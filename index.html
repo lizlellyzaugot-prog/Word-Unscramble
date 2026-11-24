@@ -866,7 +866,7 @@
         </div>
 
         <!-- Player Name Modal -->
-        <div class="modal" id="nameModal">
+        <div class="modal hidden" id="nameModal">
             <div class="modal-content">
                 <h2>Welcome! 👋</h2>
                 <p>Enter your name to start playing</p>
@@ -1430,10 +1430,8 @@
             if (!hasSeenWelcome) {
                 showWelcomeModal();
                 localStorage.setItem('wordGameWelcomeSeen', 'true');
-            } else {
-                // If player has seen welcome before, go straight to name modal
-                showNameModal();
             }
+            // Don't show name modal automatically - wait for "Let's Play!" button click
             loadPlayersFromStorage();
         }
 
