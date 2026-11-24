@@ -16,7 +16,7 @@
             padding: 20px;
         }
         .container { max-width: 1200px; margin: 0 auto; }
-        .admin-btn-top { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        .admin-btn-top { position: fixed; top: 20px; right: 20px; padding: 8px 15px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px; z-index: 1001; }
         .admin-btn-top:hover { background: #764ba2; }
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
         .modal.hidden { display: none !important; }
@@ -161,8 +161,8 @@
                         <div class="score-value" id="finalScore">0</div>
                     </div>
                     <div class="score-item">
-                        <div class="score-label">Words Skipped</div>
-                        <div class="score-value" id="finalSkipped">0</div>
+                        <div class="score-label">Time Taken</div>
+                        <div class="score-value" id="finalTime">00:00</div>
                     </div>
                 </div>
                 <div id="finalLeaderboard"></div>
@@ -375,7 +375,8 @@
         function startGame(category) {
             gameState.category = category;
             gameState.playerName = document.getElementById('playerName').value || 'Player';
-            gameState.words = gameData[category].easy;
+            // Only take first 5 words for this round
+            gameState.words = gameData[category].easy.slice(0, 5);
             gameState.currentWord = 0;
             gameState.score = 0;
             gameState.skipped = 0;
@@ -466,12 +467,45 @@
 
         function endGame() {
             clearInterval(timerInterval);
+            const timeTaken = Math.floor((Date.now() - gameStartTime) / 1000);
+            const minutes = Math.floor(timeTaken / 60);
+            const seconds = timeTaken % 60;
+            const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            
             document.getElementById('gameArea').classList.remove('active');
             document.getElementById('finalScore').textContent = gameState.score;
-            document.getElementById('finalSkipped').textContent = gameState.skipped;
+            document.getElementById('finalTime').textContent = timeStr;
             
             if (firebaseReady && db) {
                 db.ref('gameSessions/' + gameSessionId + '/players').off();
+                
+                // Update player with completion time and final score
+                db.ref('gameSessions/' + gameSessionId + '/players/' + gameState.playerName).update({
+                    score: gameState.score,
+                    timeTaken: timeTaken,
+                    completed: true,
+                    lastUpdated: Date.now()
+                });
+                
+                // Show final leaderboard with winner
+                db.ref('gameSessions/' + gameSessionId + '/players').once('value', function(snapshot) {
+                    const players = snapshot.val() || {};
+                    const completedPlayers = Object.values(players).filter(p => p.completed);
+                    const sortedPlayers = completedPlayers.sort((a, b) => {
+                        // Sort by score (descending), then by time taken (ascending)
+                        if (b.score !== a.score) return b.score - a.score;
+                        return (a.timeTaken || Infinity) - (b.timeTaken || Infinity);
+                    });
+                    
+                    let html = '<div class="leaderboard-title">🏆 Final Results</div>';
+                    sortedPlayers.forEach((player, index) => {
+                        const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                        const pTime = player.timeTaken ? String(Math.floor(player.timeTaken / 60)).padStart(2, '0') + ':' + String(player.timeTaken % 60).padStart(2, '0') : 'N/A';
+                        html += `<div class="player-row" style="padding: 10px; background: ${index === 0 ? '#fff9e6' : 'transparent'};"><span>${medal} ${player.name}</span><span>Score: ${player.score} | Time: ${pTime}</span></div>`;
+                    });
+                    
+                    document.getElementById('finalLeaderboard').innerHTML = html;
+                });
             }
 
             document.getElementById('resultsModal').classList.remove('hidden');
