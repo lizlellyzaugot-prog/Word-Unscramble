@@ -98,6 +98,17 @@
                 <h1>Welcome!</h1>
                 <p>Enter your name:</p>
                 <input type="text" id="playerName" placeholder="Your name" autofocus>
+                <button onclick="goToSessionCode()">Continue</button>
+            </div>
+        </div>
+
+        <!-- Session Code Modal -->
+        <div id="sessionCodeModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>Join or Start Game</h1>
+                <p>Enter a session code to join an existing game, or leave blank to create a new one:</p>
+                <input type="text" id="sessionCode" placeholder="Session code (optional)" autofocus>
+                <p style="font-size: 0.9em; color: #999;">Example: ABC123</p>
                 <button onclick="goToCategories()">Continue</button>
             </div>
         </div>
@@ -119,6 +130,7 @@
                 <div class="game-left">
                     <h1 id="gameTitle">Level 1</h1>
                     <p id="playerInfo">Player: <span id="playerNameDisplay">Player</span></p>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 10px;">Session Code: <strong id="sessionCodeDisplay">---</strong></p>
                     
                     <div class="score-board">
                         <div class="score-item">
@@ -218,6 +230,7 @@
         let firebaseReady = false;
         let timerInterval = null;
         let gameStartTime = null;
+        let timerStarted = false;
 
         // Initialize Firebase
         function initializeFirebase() {
@@ -366,9 +379,25 @@
             document.getElementById('playerName').focus();
         }
 
-        function goToCategories() {
+        function goToSessionCode() {
             gameState.playerName = document.getElementById('playerName').value || 'Player';
             document.getElementById('nameModal').classList.add('hidden');
+            document.getElementById('sessionCodeModal').classList.remove('hidden');
+            document.getElementById('sessionCode').focus();
+        }
+
+        function goToCategories() {
+            const userSessionCode = document.getElementById('sessionCode').value.trim().toUpperCase();
+            
+            if (userSessionCode) {
+                // User wants to join existing session
+                gameSessionId = userSessionCode;
+            } else {
+                // Create new session with simple 6-character code
+                gameSessionId = 'SESSION_' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            }
+            
+            document.getElementById('sessionCodeModal').classList.add('hidden');
             document.getElementById('categoryModal').classList.remove('hidden');
         }
 
@@ -380,14 +409,15 @@
             gameState.currentWord = 0;
             gameState.score = 0;
             gameState.skipped = 0;
-            gameStartTime = Date.now();
+            timerStarted = false;
 
-            gameSessionId = generateSessionId();
+            // gameSessionId is already set by goToCategories()
             initializeFirebase();
 
             document.getElementById('categoryModal').classList.add('hidden');
             document.getElementById('gameArea').classList.add('active');
             document.getElementById('playerNameDisplay').textContent = gameState.playerName;
+            document.getElementById('sessionCodeDisplay').textContent = gameSessionId;
 
             if (firebaseReady && db) {
                 db.ref('gameSessions/' + gameSessionId + '/players/' + gameState.playerName).set({
@@ -400,12 +430,13 @@
                 db.ref('gameSessions/' + gameSessionId + '/players').on('value', updateLeaderboard);
             }
 
-            startTimer();
             showNextWord();
         }
 
         function startTimer() {
-            if (timerInterval) clearInterval(timerInterval);
+            if (timerStarted || timerInterval) return;
+            timerStarted = true;
+            gameStartTime = Date.now();
             
             timerInterval = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
@@ -433,6 +464,8 @@
         }
 
         function checkAnswer() {
+            startTimer();
+            
             const answer = document.getElementById('answerInput').value.toUpperCase();
             const correctAnswer = gameState.words[gameState.currentWord];
 
@@ -460,6 +493,7 @@
         }
 
         function skipWord() {
+            startTimer();
             gameState.skipped++;
             gameState.currentWord++;
             showNextWord();
@@ -530,6 +564,9 @@
         function playAgain() {
             document.getElementById('resultsModal').classList.add('hidden');
             document.getElementById('categoryModal').classList.remove('hidden');
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerStarted = false;
             gameState = {
                 playerName: document.getElementById('playerName').value,
                 category: '',
@@ -545,6 +582,8 @@
             document.getElementById('resultsModal').classList.add('hidden');
             document.getElementById('welcomeModal').classList.remove('hidden');
             clearInterval(timerInterval);
+            timerInterval = null;
+            timerStarted = false;
             gameState = {
                 playerName: '',
                 category: '',
