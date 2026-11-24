@@ -207,6 +207,17 @@
                         <button onclick="removeSelectedPlayers()">🗑️ Remove Selected</button>
                         <button class="secondary" onclick="closeAdminPanel()">Close</button>
                     </div>
+
+                    <hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+                    <h2>Session History</h2>
+                    <p style="color: #999; font-size: 0.9em;">View previous game sessions and results.</p>
+                    
+                    <div id="sessionHistory" style="margin: 20px 0; max-height: 400px; overflow-y: auto;"></div>
+                    
+                    <div class="btn-row">
+                        <button onclick="clearSessionHistory()" style="background: #dc3545;">🗑️ Clear All History</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -231,6 +242,7 @@
         let timerInterval = null;
         let gameStartTime = null;
         let timerStarted = false;
+        let sessionHistory = [];
 
         // Initialize Firebase
         function initializeFirebase() {
@@ -313,6 +325,7 @@
                 document.getElementById('adminLoginForm').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
                 loadPlayersList();
+                loadSessionHistory();
             } else {
                 alert('Incorrect password');
             }
@@ -370,6 +383,59 @@
 
             selectedPlayers.clear();
             loadPlayersList();
+        }
+
+        function loadSessionHistory() {
+            const saved = localStorage.getItem('gameSessionHistory');
+            if (saved) {
+                sessionHistory = JSON.parse(saved);
+            }
+
+            let html = '';
+            if (sessionHistory.length === 0) {
+                html = '<p style="color: #666; text-align: center;">No session history yet</p>';
+            } else {
+                sessionHistory.forEach((session, idx) => {
+                    const winnerName = session.players.length > 0 ? session.players[0].name : 'Unknown';
+                    const winnerScore = session.players.length > 0 ? session.players[0].score : 0;
+                    const winnerTime = session.players.length > 0 ? 
+                        String(Math.floor(session.players[0].time / 60)).padStart(2, '0') + ':' + 
+                        String(session.players[0].time % 60).padStart(2, '0') : 'N/A';
+                    
+                    html += `
+                        <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #667eea;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>Session ${idx + 1}</strong> • ${session.category} 
+                                    <div style="font-size: 0.85em; color: #666; margin-top: 5px;">${session.timestamp}</div>
+                                    <div style="font-size: 0.9em; margin-top: 8px;">
+                                        <strong>🥇 Winner: ${winnerName}</strong> (Score: ${winnerScore}, Time: ${winnerTime})<br>
+                                        <span style="color: #666; font-size: 0.85em;">Players: ${session.players.length}</span>
+                                    </div>
+                                </div>
+                                <button onclick="deleteSessionHistory(${idx})" style="background: #dc3545; padding: 8px 12px; min-width: auto; height: fit-content;">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('sessionHistory').innerHTML = html;
+        }
+
+        function deleteSessionHistory(index) {
+            if (!confirm('Delete this session record?')) return;
+            sessionHistory.splice(index, 1);
+            localStorage.setItem('gameSessionHistory', JSON.stringify(sessionHistory));
+            loadSessionHistory();
+        }
+
+        function clearSessionHistory() {
+            if (!confirm('Delete ALL session history? This cannot be undone.')) return;
+            sessionHistory = [];
+            localStorage.removeItem('gameSessionHistory');
+            loadSessionHistory();
+            alert('All session history has been cleared.');
         }
 
         // Game UI functions
@@ -531,6 +597,21 @@
                         return (a.timeTaken || Infinity) - (b.timeTaken || Infinity);
                     });
                     
+                    // Save session to history
+                    const sessionSummary = {
+                        sessionId: gameSessionId,
+                        timestamp: new Date().toLocaleString(),
+                        category: gameState.category.charAt(0).toUpperCase() + gameState.category.slice(1),
+                        players: sortedPlayers.map((p, idx) => ({
+                            name: p.name,
+                            score: p.score,
+                            time: p.timeTaken,
+                            medal: idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'
+                        }))
+                    };
+                    sessionHistory.push(sessionSummary);
+                    localStorage.setItem('gameSessionHistory', JSON.stringify(sessionHistory));
+                    
                     let html = '<div class="leaderboard-title">🏆 Final Results</div>';
                     sortedPlayers.forEach((player, index) => {
                         const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
@@ -596,6 +677,7 @@
         }
 
         // Initialize
+        loadSessionHistory();
         initializeFirebase();
     </script>
 </body>
