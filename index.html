@@ -1,0 +1,2227 @@
+﻿﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Unscramble Game</title>
+    <!-- Version: 2.1 | Updated: 2026-11-24 18:25 | Cache Bust: 1795515887 -->
+    <!-- Firebase SDK (Compatible version) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .modal.hidden {
+            display: none;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 28px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 400px;
+            width: 90%;
+            max-height: calc(100vh - 24px);
+            overflow-y: auto;
+        }
+
+        .welcome-modal-content {
+            max-width: 600px;
+            padding: 24px 28px;
+        }
+
+        .welcome-instructions {
+            text-align: left;
+            font-size: 0.95em;
+            line-height: 1.55;
+        }
+
+        .welcome-instructions h3 {
+            color: #667eea;
+            margin-top: 10px;
+            margin-bottom: 4px;
+        }
+
+        .modal-content h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .modal-content p {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .modal-content input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .level-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            padding: 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .category-btn-emoji {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .category-btn-name {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .category-btn-desc {
+            display: block;
+            font-size: 0.8em;
+            font-weight: 400;
+            color: #666;
+        }
+
+        .category-btn.active .category-btn-desc {
+            color: #e0e0e0;
+        }
+
+        .menu-players-board {
+            display: none;
+            margin-top: 20px;
+            padding: 18px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .menu-players-board h2 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+        }
+
+        #menuPlayersScoreBoard {
+            display: grid;
+            gap: 8px;
+        }
+
+        #menuPlayersScoreBoard .player-score-item {
+            margin-bottom: 0;
+        }
+
+        .level-btn {
+            padding: 15px 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .level-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .game-area.active {
+            display: block;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            gap: 10px;
+        }
+
+        .player-info {
+            background: #667eea;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+        }
+
+        .current-player {
+            white-space: nowrap;
+        }
+
+        .btn-players-list {
+            padding: 8px 15px;
+            background: #764ba2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-players-list:hover {
+            background: #653a8a;
+        }
+
+        .players-list {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 330px;
+            height: 100vh;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            z-index: 999;
+            overflow-y: auto;
+            transition: right 0.3s ease;
+        }
+
+        .players-list.show {
+            right: 0;
+        }
+
+        .players-list h3 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .btn-close-players {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ddd;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .player-score-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-score-item.current {
+            background: #e7f3ff;
+            border-left-color: #28a745;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .player-score {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .progress {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .word-display {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .word-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .word-actions .btn {
+            width: 100%;
+            min-width: 0;
+            padding: 10px 6px;
+            font-size: 0.9em;
+        }
+
+        .btn-hint {
+            background: #ff9800;
+            color: white;
+        }
+
+        .btn-hint:hover {
+            background: #f57c00;
+        }
+
+        .scrambled-word {
+            font-size: 2.5em;
+            color: #667eea;
+            letter-spacing: 5px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hint {
+            color: #999;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .input-section {
+            margin-bottom: 20px;
+        }
+
+        .input-section label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .input-section input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+
+        .input-section input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+
+        .btn-skip {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-skip:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-reset {
+            grid-column: 1 / -1;
+            background: #999;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #888;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #28a745;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+
+        .answer-tracker {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 2px solid #b3d9ff;
+        }
+
+        .correct-answer-entry {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: white;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .answer-player-name {
+            font-weight: 600;
+            color: #004085;
+        }
+
+        .score-board {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            display: inline-block;
+            margin: 0 15px;
+        }
+
+        .score-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .results-section.active {
+            display: block;
+        }
+
+        .results-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .final-leaderboard {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            border: 2px solid #667eea;
+        }
+
+        .final-leaderboard h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .leaderboard-entry.first {
+            background: #fff8dc;
+            border-left-color: #ffc107;
+        }
+
+        .leaderboard-entry.second {
+            background: #f5f5f5;
+            border-left-color: #c0c0c0;
+        }
+
+        .leaderboard-entry.third {
+            background: #fef5e7;
+            border-left-color: #cd7f32;
+        }
+
+        .leaderboard-rank {
+            font-size: 1.3em;
+            font-weight: bold;
+            width: 30px;
+        }
+
+        .leaderboard-rank.first::before {
+            content: '🥇;
+        }
+
+        .leaderboard-rank.second::before {
+            content: '🥇;
+        }
+
+        .leaderboard-rank.third::before {
+            content: '🥇;
+        }
+
+        .leaderboard-player {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+        }
+
+        .leaderboard-score {
+            background: #667eea;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .results-list {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .result-item.correct {
+            border-left-color: #28a745;
+        }
+
+        .result-item.incorrect {
+            border-left-color: #dc3545;
+        }
+
+        .result-word {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .result-answer {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .email-section {
+            margin-top: 25px;
+            padding: 20px;
+            background: #e7f3ff;
+            border-radius: 10px;
+            border: 2px solid #b3d9ff;
+        }
+
+        .email-section h3 {
+            color: #004085;
+            margin-bottom: 10px;
+        }
+
+        .email-section input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #b3d9ff;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+
+        .btn-email {
+            width: 100%;
+            background: #004085;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-email:hover {
+            background: #003068;
+        }
+
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 12px;
+                align-items: flex-start;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+                margin: 34px 0 16px;
+            }
+
+            .level-selector {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+                margin-bottom: 18px;
+            }
+
+            .level-btn {
+                padding: 12px 6px;
+                font-size: 0.95em;
+            }
+
+            .scrambled-word {
+                font-size: clamp(1.35em, 8vw, 2em);
+                letter-spacing: 3px;
+                overflow-wrap: anywhere;
+            }
+
+            .word-display {
+                padding: 20px 12px;
+            }
+
+            .modal {
+                align-items: flex-start;
+            }
+
+            .modal-content {
+                width: 100%;
+                padding: 22px 18px;
+                margin: auto 0;
+            }
+
+            .welcome-modal-content {
+                padding: 18px 16px;
+            }
+
+            .welcome-modal-content h2 {
+                font-size: 1.4em;
+                margin-bottom: 8px;
+            }
+
+            .welcome-instructions {
+                font-size: 0.84em;
+                line-height: 1.35;
+            }
+
+            .welcome-instructions h3 {
+                margin-top: 6px;
+                font-size: 1.05em;
+            }
+
+            .welcome-instructions p,
+            .welcome-instructions ol,
+            .welcome-instructions ul {
+                padding-left: 18px;
+                margin-top: 0;
+                margin-bottom: 6px;
+            }
+
+            .welcome-instructions p {
+                padding-left: 0;
+            }
+
+            .score-item {
+                display: block;
+                margin: 0;
+            }
+
+            .score-board {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+                padding: 14px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .players-list {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="position: relative;">
+        <div style="position: absolute; top: 20px; right: 20px;">
+             <button class="btn-admin" onclick="openAdminPanel()" style="background: #667eea; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">⚙️ Admin</button>
+        </div>
+        <h1>🎮ord Unscramble</h1>
+
+        <!-- Welcome/Instructions Modal -->
+        <div class="modal" id="welcomeModal">
+            <div class="modal-content welcome-modal-content">
+                <h2>📋 How to Play</h2>
+                <div class="welcome-instructions">
+                    <h3>🎯 Objective</h3>
+                    <p>Unscramble the letters to find the correct word. Answer as many as you can!</p>
+                    
+                    <h3>🎮 How It Works</h3>
+                    <ol style="padding-left: 20px;">
+                        <li><strong>Enter your name</strong> to join the game</li>
+                        <li><strong>Choose a difficulty level</strong>: Easy, Moderate, or Difficult</li>
+                        <li><strong>See scrambled words</strong> one by one</li>
+                        <li><strong>Type the correct answer</strong> or use hints</li>
+                        <li><strong>Skip words</strong> you don't know</li>
+                        <li><strong>View the leaderboard</strong> to see all players' scores in real-time</li>
+                    </ol>
+                    
+                    <h3>⭐ Multiplayer Features</h3>
+                    <ul style="padding-left: 20px;">
+                        <li>👥 <strong>Live Leaderboard</strong> - See all players' scores</li>
+                        <li>🏆 <strong>First-to-Answer Tracking</strong> - See who solved each word first</li>
+                        <li>📊 <strong>Real-time Sync</strong> - Scores update instantly across all devices</li>
+                    </ul>
+                    
+                    <h3>💡 Tips</h3>
+                    <ul style="padding-left: 20px;">
+                        <li>Use the <strong>Hint</strong> button if you get stuck</li>
+                        <li>You can <strong>Skip</strong> any word you don't know</li>
+                        <li>Type your answer and press <strong>Enter</strong> or click <strong>Submit</strong></li>
+                        <li>Compete with your colleagues in real-time!</li>
+                    </ul>
+                </div>
+                <button class="btn btn-submit" onclick="closeWelcomeAndShowName()" style="width: 100%; margin-top: 20px;">Let's Play! 🚀</button>
+            </div>
+        </div>
+
+        <!-- Player Name Modal -->
+        <div class="modal hidden" id="nameModal">
+            <div class="modal-content">
+                <h2>Welcome! 👋</h2>
+                <p>Enter your name to start playing</p>
+                <input 
+                    type="text" 
+                    id="playerNameInput" 
+                    placeholder="Enter your name..."
+                    autocomplete="off"
+                    onkeypress="if(event.key==='Enter') setPlayerName()"
+                >
+                <button class="btn btn-submit" onclick="setPlayerName()" style="width: 100%; margin-top: 15px;">Start Playing</button>
+            </div>
+        </div>
+
+        <!-- Category Selection Modal -->
+        <div class="modal" id="categoryModal" style="display: none;">
+            <div class="modal-content">
+                <h2>Select a Category 📚</h2>
+                <p style="margin-bottom: 20px;">Choose a category to begin playing</p>
+                <div class="category-selector">
+                    <button class="category-btn" onclick="selectCategory('travel')">
+                        <span class="category-btn-emoji">✈️</span>
+                        <span class="category-btn-name">Travel</span>
+                        <span class="category-btn-desc">Aviation & Tourism</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('politics')">
+                        <span class="category-btn-emoji">🗳️</span>
+                        <span class="category-btn-name">Philippine Politics</span>
+                        <span class="category-btn-desc">Government & Politics</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('geography')">
+                        <span class="category-btn-emoji">🗺️</span>
+                        <span class="category-btn-name">Asian Geography</span>
+                        <span class="category-btn-desc">Towns & Countries</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('animals')">
+                        <span class="category-btn-emoji">🦁</span>
+                        <span class="category-btn-name">Animals</span>
+                        <span class="category-btn-desc">Wildlife & Creatures</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Selection -->
+        <div class="level-selector" id="levelSelector" style="display: none;">
+            <button class="level-btn" onclick="startLevel(1)">
+                <div>Level 1</div>
+                <div style="font-size: 0.8em;">Easy</div>
+            </button>
+            <button class="level-btn" onclick="startLevel(2)">
+                <div>Level 2</div>
+                <div style="font-size: 0.8em;">Moderate</div>
+            </button>
+            <button class="level-btn" onclick="startLevel(3)">
+                <div>Level 3</div>
+                <div style="font-size: 0.8em;">Difficult</div>
+            </button>
+        </div>
+
+        <section class="menu-players-board" id="menuPlayersBoard" aria-labelledby="menuPlayersHeading">
+            <h2 id="menuPlayersHeading">Players &amp; Scores</h2>
+            <div id="menuPlayersScoreBoard"></div>
+        </section>
+
+        <!-- Game Area -->
+        <div class="game-area" id="gameArea">
+            <div class="game-header">
+                <div class="player-info">
+                    <span class="current-player">👤 <span id="currentPlayerName">Player</span></span>
+                </div>
+                <div style="flex: 1; text-align: center;">
+                    <div style="font-weight: 600; color: #333;">Level <span id="levelDisplay">1</span></div>
+                </div>
+                <div style="text-align: right;">
+                    <button class="btn-players-list" onclick="togglePlayersList()">👥 Players</button>
+                </div>
+            </div>
+
+            <div class="players-list" id="playersList">
+                <h3>🏆 Players & Scores</h3>
+                <div id="playersScoreBoard"></div>
+                <button class="btn-close-players" onclick="togglePlayersList()">✕</button>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">Correct</div>
+                    <div class="score-value" id="correctCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Progress</div>
+                    <div class="score-value" id="progressText">0/5</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Skipped</div>
+                    <div class="score-value" id="skippedCount">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Timer</div>
+                    <div class="score-value" id="gameTimer">00:00</div>
+                </div>
+            </div>
+
+            <div class="progress" id="progressBar"></div>
+
+            <div class="word-display">
+                <div class="scrambled-word" id="scrambledWord">EXAMPLE</div>
+                <div class="hint" id="hint" style="display: none;"></div>
+                <div class="word-actions">
+                    <button class="btn btn-hint" id="hintBtn" onclick="toggleHint()">💡 Show Hint</button>
+                    <button class="btn btn-skip" onclick="shuffleCurrentWord()">🔀 Shuffle Letters</button>
+                </div>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="answer-tracker" id="answerTracker" style="display: none;">
+                <div style="font-weight: 600; margin-bottom: 10px;">✓ Correct Answers:</div>
+                <div id="correctAnswersList"></div>
+            </div>
+
+            <div class="input-section">
+                <label for="answerInput">Your Answer:</label>
+                <input 
+                    type="text" 
+                    id="answerInput" 
+                    placeholder="Type your answer here..." 
+                    autocomplete="off"
+                    onkeypress="if(event.key==='Enter') submitAnswer()"
+                >
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-submit" onclick="submitAnswer()">Submit</button>
+                <button class="btn btn-skip" onclick="skipWord()">Skip</button>
+                <button class="btn btn-reset" onclick="resetGame()">Back to Menu</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <h2>🎮evel Complete!</h2>
+
+            <div class="final-leaderboard" id="finalLeaderboard">
+                <h3>🏆 Final Leaderboard</h3>
+                <div id="leaderboardContent"></div>
+            </div>
+
+            <div class="results-list" id="resultsList"></div>
+
+            <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <button class="btn btn-submit" onclick="resetGameToMenu()" style="width: 100%;">Main Menu</button>
+                <button class="btn btn-skip" onclick="startLevel(gameState.currentLevel)" style="width: 100%;">Play Again</button>
+            </div>
+        </div>
+
+        <!-- Admin Panel Modal -->
+        <div class="modal" id="adminModal" style="display: none;">
+            <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
+                <h2>📝 Admin Panel - Update Words</h2>
+                
+                <div id="adminLoginForm">
+                    <p>Enter admin password:</p>
+                    <input 
+                        type="password" 
+                        id="adminPassword" 
+                        placeholder="Admin password"
+                        onkeypress="if(event.key==='Enter') adminLogin()"
+                    >
+                    <button class="btn btn-submit" onclick="adminLogin()" style="width: 100%; margin-top: 10px;">Login</button>
+                    <button class="btn btn-skip" onclick="closeAdminPanel()" style="width: 100%; margin-top: 10px;">Cancel</button>
+                </div>
+
+                <div id="adminContent" style="display: none;">
+                    <!-- Admin Tabs -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
+                        <button id="tabWords" class="admin-tab" onclick="switchAdminTab('words')" style="flex: 1; padding: 10px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">✏️ Edit Words</button>
+                        <button id="tabPlayers" class="admin-tab" onclick="switchAdminTab('players')" style="flex: 1; padding: 10px; background: #ddd; color: #333; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">👥 Manage Players</button>
+                    </div>
+
+                    <!-- Words Tab -->
+                    <div id="adminWordsTab" style="display: block;">
+                        <div style="margin-bottom: 20px;">
+                            <label style="font-weight: 600; display: block; margin-bottom: 5px;">Select Level:</label>
+                            <select id="adminLevelSelect" onchange="loadLevelWords()" style="width: 100%; padding: 8px;">
+                                <option value="1">Level 1 - Easy</option>
+                                <option value="2">Level 2 - Moderate</option>
+                                <option value="3">Level 3 - Difficult</option>
+                            </select>
+                        </div>
+
+                        <div id="wordsContainer" style="display: grid; gap: 15px;">
+                            <!-- Word forms will be generated here -->
+                        </div>
+
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button class="btn btn-submit" onclick="saveWords()" style="width: 100%;">💾 Save Changes</button>
+                            <button class="btn btn-skip" onclick="closeAdminPanel()" style="width: 100%;">Close</button>
+                        </div>
+                    </div>
+
+                    <!-- Players Tab -->
+                    <div id="adminPlayersTab" style="display: none;">
+                        <h3 style="margin-bottom: 15px;">🧹 Remove Inactive Players</h3>
+                        
+                        <div style="margin-bottom: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
+                            <p style="margin-bottom: 10px;"><strong>Current Players:</strong></p>
+                            <div id="inactivePlayersList" style="display: grid; gap: 8px; margin-bottom: 10px;">
+                                <p style="color: #666;">Loading players...</p>
+                            </div>
+                            <button class="btn btn-submit" onclick="removeInactivePlayers()" style="width: 100%;">🗑️ Remove Selected Inactive Players</button>
+                        </div>
+
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <button class="btn btn-skip" onclick="closeAdminPanel()" style="width: 100%;">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-I817M6AXd_Kea2TE0lioIXNq95gjq2s",
+            authDomain: "word-unscramble-game-bba02.firebaseapp.com",
+            databaseURL: "https://word-unscramble-game-bba02-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "word-unscramble-game-bba02",
+            storageBucket: "word-unscramble-game-bba02.firebasestorage.app",
+            messagingSenderId: "940885860126",
+            appId: "1:940885860126:web:192e1fe2410a6eb07d730f",
+            measurementId: "G-500KYRN549"
+        };
+
+        // Initialize Firebase
+        let db = null;
+        let playersRef = null;
+        let gameSessionId = null;
+        let firebaseReady = false;
+
+        // Wait for Firebase to load
+        function initializeFirebase() {
+            if (typeof firebase === 'undefined') {
+                console.warn("Firebase SDK not loaded yet, retrying...");
+                setTimeout(initializeFirebase, 500);
+                return;
+            }
+
+            try {
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.database();
+                firebaseReady = true;
+                console.log("Firebase initialized successfully");
+            } catch (error) {
+                console.warn("Firebase initialization error:", error.message);
+                firebaseReady = false;
+                console.log("Game will work in local-device mode (multiplayer will be limited)");
+            }
+        }
+
+        // Game Data - Organized by Categories
+        const categories = {
+            travel: {
+                name: '✈️ Travel',
+                description: 'Words about travel and tourism',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'SKED', answer: 'DESK', hint: 'Laging inaagaw ng CLAIMS' },
+                            { scrambled: 'PIRT', answer: 'TRIP', hint: 'A journey to another place' },
+                            { scrambled: 'PAMS', answer: 'MAPS', hint: 'Helps you find your destination' },
+                            { scrambled: 'RDAC', answer: 'CARD', hint: 'You might use this to pay while traveling' },
+                            { scrambled: 'OTPR', answer: 'PORT', hint: 'A place where ships arrive and depart' },
+                            { scrambled: 'XITA', answer: 'TAXI', hint: 'A car you can hire to take you somewhere' },
+                            { scrambled: 'TEAG', answer: 'GATE', hint: 'Where passengers wait to board' },
+                            { scrambled: 'BCA', answer: 'CAB', hint: 'Another word for a taxi' },
+                            { scrambled: 'NATIR', answer: 'TRAIN', hint: 'A vehicle that runs on railway tracks' },
+                            { scrambled: 'SBU', answer: 'BUS', hint: 'A road vehicle that carries many passengers' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'OETLH', answer: 'HOTEL', hint: 'Where travelers stay overnight' },
+                            { scrambled: 'KTEICT', answer: 'TICKET', hint: "Proof that you're booked to travel" },
+                            { scrambled: 'GENTSA', answer: 'AGENTS', hint: 'They can help arrange travel' },
+                            { scrambled: 'IKOSK', answer: 'KIOSK', hint: 'Self-service machine found at airports' },
+                            { scrambled: 'UEQUE', answer: 'QUEUE', hint: 'A line of passengers waiting' },
+                            { scrambled: 'BICAN', answer: 'CABIN', hint: 'The passenger area inside an aircraft' },
+                            { scrambled: 'YAWUNR', answer: 'RUNWAY', hint: 'The strip where aircraft take off and land' },
+                            { scrambled: 'TOLPI', answer: 'PILOT', hint: 'The person who flies an aircraft' },
+                            { scrambled: 'GYAVOE', answer: 'VOYAGE', hint: 'A long journey, often by sea' },
+                            { scrambled: 'STUOSMC', answer: 'CUSTOMS', hint: 'Where travelers declare goods at a border' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'RANIIETRY', answer: 'ITINERARY', hint: 'Your detailed travel schedule' },
+                            { scrambled: 'RUTDEPAER', answer: 'DEPARTURE', hint: 'When your flight leaves' },
+                            { scrambled: 'RIFCTAAR', answer: 'AIRCRAFT', hint: 'The vehicle used to fly passengers' },
+                            { scrambled: 'DASUAME', answer: 'AMADEUS', hint: 'where you work' },
+                            { scrambled: 'SROPPATS', answer: 'PASSPORT', hint: 'Required for most international travel' },
+                            { scrambled: 'TNASTIR', answer: 'TRANSIT', hint: 'Travel through or across a place' },
+                            { scrambled: 'TADENOSINTI', answer: 'DESTINATION', hint: 'The place you are traveling to' },
+                            { scrambled: 'NOCETCINON', answer: 'CONNECTION', hint: 'A transfer between two travel services' },
+                            { scrambled: 'LIMREANT', answer: 'TERMINAL', hint: 'A passenger building at an airport' },
+                            { scrambled: 'NNOIATVIGA', answer: 'NAVIGATION', hint: 'Finding and following a route' }
+                        ]
+                    }
+                }
+            },
+            politics: {
+                name: '🗳️ Philippine Politics',
+                description: 'Words about Philippine politics and government',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'TOVE', answer: 'VOTE', hint: 'Cast your ballot in an election' },
+                            { scrambled: 'WALLO', answer: 'ALLOW', hint: 'Permission to do something' },
+                            { scrambled: 'WLLI', answer: 'WILL', hint: 'Determination and purpose' },
+                            { scrambled: 'WALS', answer: 'LAWS', hint: 'Rules set by the government' },
+                            { scrambled: 'ETNSA', answer: 'SENATE', hint: 'Upper chamber of Congress' },
+                            { scrambled: 'RTEISDN', answer: 'RESIDENT', hint: 'Person living in a place' },
+                            { scrambled: 'SSEM', answer: 'MESS', hint: 'Disorderly situation' },
+                            { scrambled: 'LIACMIT', answer: 'CLIMATE', hint: 'Weather patterns of a region' },
+                            { scrambled: 'GNIR', answer: 'RING', hint: 'Circular band' },
+                            { scrambled: 'RLAPU', answer: 'PLURAL', hint: 'More than one' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'NATRESDIIPEL', answer: 'PRESIDENTIAL', hint: 'Relating to the president' },
+                            { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Based on the constitution' },
+                            { scrambled: 'YRCHANOM', answer: 'MONARCHY', hint: 'Government ruled by a king or queen' },
+                            { scrambled: 'TERCEDPEN', answer: 'PRECEDENT', hint: 'An earlier decision used as an example' },
+                            { scrambled: 'TNEMAILRAP', answer: 'PARLIAMENT', hint: 'Body of government officials' },
+                            { scrambled: 'YRTSINIM', answer: 'MINISTRY', hint: 'Government department' },
+                            { scrambled: 'TNESERPER', answer: 'REPRESENT', hint: 'To act on behalf of others' },
+                            { scrambled: 'DORCILCEO', answer: 'CROCODILE', hint: 'A large aquatic reptile with powerful jaws' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'TLACILBO', answer: 'OBLITICAL', hint: 'Relating to politics' },
+                            { scrambled: 'YASNOITUTITSNOC', answer: 'CONSTITUTIONALS', hint: 'Supporters of constitutional monarchy' },
+                            { scrambled: 'YCAROMITAP', answer: 'PATRIOMACY', hint: 'Rule by the father figure' },
+                            { scrambled: 'RABK ROLPER', answer: 'PORK BARREL', hint: 'Government spending directed toward local projects' },
+                            { scrambled: 'RUPTOCRION', answer: 'CORRUPTION', hint: 'Dishonest or illegal use of power for personal gain' },
+                            { scrambled: 'TNEMEVOM', answer: 'MOVEMENT', hint: 'Group action towards a goal' },
+                            { scrambled: 'MECYROADC', answer: 'DEMOCRACY', hint: 'Government by the people' },
+                            { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Relating to the constitution' },
+                            { scrambled: 'TIDRANIMOSATIN', answer: 'ADMINISTRATION', hint: 'Management of government' },
+                            { scrambled: 'NOITUCESORP', answer: 'PROSECUTION', hint: 'Legal pursuit of a case' }
+                        ]
+                    }
+                }
+            },
+            geography: {
+                name: '🗺️ Asian Geography',
+                description: 'Towns, cities and countries in Philippines and Asia',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'ALIMAN', answer: 'MANILA', hint: 'Capital of the Philippines' },
+                            { scrambled: 'SAINA', answer: 'ASIAN', hint: 'Relating to Asia' },
+                            { scrambled: 'NAPAJ', answer: 'JAPAN', hint: 'Country with Mount Fuji' },
+                            { scrambled: 'HAITI', answer: 'HAITI', hint: 'Caribbean island nation' },
+                            { scrambled: 'AIDNI', answer: 'INDIA', hint: 'Large Asian country' },
+                            { scrambled: 'INAHC', answer: 'CHINA', hint: 'Most populous country in Asia' },
+                            { scrambled: 'LEUOS', answer: 'SEOUL', hint: 'Capital of South Korea' },
+                            { scrambled: 'GNABKOK', answer: 'BANGKOK', hint: 'Capital of Thailand' },
+                            { scrambled: 'OIHNA', answer: 'HANOI', hint: 'Capital of Vietnam' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'OLLIIO', answer: 'ILOILO', hint: 'City in Western Visayas' },
+                            { scrambled: 'AODVA', answer: 'DAVAO', hint: 'City in Mindanao' },
+                            { scrambled: 'UGABIO', answer: 'BAGUIO', hint: 'A Philippine city known for its cool climate and mountain scenery' },
+                            { scrambled: 'GAPOSNIRE', answer: 'SINGAPORE', hint: 'A city-state in Southeast Asia known for Marina Bay and its modern skyline' },
+                            { scrambled: 'YASAMAIL', answer: 'MALAYSIA', hint: 'A Southeast Asian country known for the Petronas Twin Towers' },
+                            { scrambled: 'SIAODNENI', answer: 'INDONESIA', hint: 'A Southeast Asian country made up of thousands of islands' },
+                            { scrambled: 'RYANMAM', answer: 'MYANMAR', hint: 'A Southeast Asian country formerly known as Burma' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'GELAMACISAP', answer: 'MEGAPOLICIES', hint: 'Large-scale regional strategies' },
+                            { scrambled: 'ENIPPILIHIP', answer: 'PHILIPPINE', hint: 'Relating to the Philippines' },
+                            { scrambled: 'LACIHPARGEOG', answer: 'GEOGRAPHICAL', hint: 'Related to geography' },
+                            { scrambled: 'OGALEPIHCRA', answer: 'ARCHIPELAGO', hint: 'Group of islands' },
+                            { scrambled: 'LACITILOPGEO', answer: 'GEOPOLITICAL', hint: 'Political relations between regions' },
+                            { scrambled: 'LACIHPARGGEO', answer: 'GEOGRAPHICAL', hint: 'Study of regions and places' },
+                            { scrambled: 'LANOITANRETNI', answer: 'INTERNATIONAL', hint: 'Between nations' },
+                            { scrambled: 'LANIOREG', answer: 'REGIONAL', hint: 'Relating to a specific area' },
+                            { scrambled: 'LANIOTUTITSIN', answer: 'INSTITUTIONAL', hint: 'Related to institutions' }
+                        ]
+                    }
+                }
+            },
+            animals: {
+                name: '🦁 Animals',
+                description: 'Names of animals from around the world',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'TAC', answer: 'CAT', hint: 'A small furry pet that meows' },
+                            { scrambled: 'GOD', answer: 'DOG', hint: 'Man\'s best friend' },
+                            { scrambled: 'ARBEZ', answer: 'ZEBRA', hint: 'African animal with black and white stripes' },
+                            { scrambled: 'RABE', answer: 'BEAR', hint: 'Large furry animal that hibernates' },
+                            { scrambled: 'OWL', answer: 'OWL', hint: 'Nocturnal bird that hoots' },
+                            { scrambled: 'EKANS', answer: 'SNAKE', hint: 'Reptile with no legs' },
+                            { scrambled: 'ONIL', answer: 'LION', hint: 'The king of the jungle' },
+                            { scrambled: 'TIGRE', answer: 'TIGER', hint: 'Orange striped big cat' },
+                            { scrambled: 'HSIF', answer: 'FISH', hint: 'Aquatic animal with gills' },
+                            { scrambled: 'RIERDEEN', answer: 'REINDEER', hint: 'Animal that pulls Santa\'s sleigh' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'TNAPHELE', answer: 'ELEPHANT', hint: 'Large animal with a long trunk' },
+                            { scrambled: 'RAFFIGE', answer: 'GIRAFFE', hint: 'Tallest animal with a long neck' },
+                            { scrambled: 'ROCOCDERIL', answer: 'CROCODILE', hint: 'Reptile with many teeth' },
+                            { scrambled: 'TABBIR', answer: 'RABBIT', hint: 'Small furry animal with long ears' },
+                            { scrambled: 'PATOPHIMSUP', answer: 'HIPPOPOTAMUS', hint: 'A large African mammal that spends much of its time in water' },
+                            { scrambled: 'YEKNOM', answer: 'MONKEY', hint: 'Primate that swings in trees' },
+                            { scrambled: 'TORRAP', answer: 'PARROT', hint: 'Colorful bird that can talk' },
+                            { scrambled: 'HCIRTSO', answer: 'OSTRICH', hint: 'Largest flightless bird' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'PESZCEHNAEIM', answer: 'CHIMPANZEES', hint: 'Our closest relatives in the animal kingdom' },
+                            { scrambled: 'VORUCRIANOS', answer: 'CARNIVOROUS', hint: 'Animals that eat meat' },
+                            { scrambled: 'TURNCONAL', answer: 'NOCTURNAL', hint: 'Animals that are active at night' },
+                            { scrambled: 'DROTERAP', answer: 'PREDATOR', hint: 'Animal that hunts others' },
+                            { scrambled: 'RATANUTAL', answer: 'TARANTULA', hint: 'Large hairy spider' },
+                            { scrambled: 'ROCPIONS', answer: 'SCORPION', hint: 'Arachnid with a poisonous tail' },
+                            { scrambled: 'SMMAALM', answer: 'MAMMALS', hint: 'Warm-blooded animals with fur' }
+                        ]
+                    }
+                }
+            }
+        };
+
+        const gameData = categories.travel.levels;
+
+        function getNextWordsForLevel(level) {
+            const batchSize = 5;
+            const storageKey = `wordGameWordDecks_${gameState.currentCategory}`;
+            let decks = {};
+
+            try {
+                decks = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            } catch (error) {
+                decks = {};
+            }
+
+            const deck = decks[level] && Array.isArray(decks[level].remaining)
+                ? decks[level]
+                : { remaining: [], previousBatch: [] };
+
+            if (deck.remaining.length < batchSize) {
+                const categoryData = categories[gameState.currentCategory];
+                const levelData = categoryData.levels[level];
+                const shuffledWords = [...levelData.words];
+                for (let index = shuffledWords.length - 1; index > 0; index--) {
+                    const randomIndex = Math.floor(Math.random() * (index + 1));
+                    [shuffledWords[index], shuffledWords[randomIndex]] = [shuffledWords[randomIndex], shuffledWords[index]];
+                }
+
+                const previousBatch = Array.isArray(deck.previousBatch) ? deck.previousBatch : [];
+                const nextBatch = new Set(shuffledWords.slice(0, batchSize).map(word => word.answer));
+                if (previousBatch.length === batchSize && previousBatch.every(answer => nextBatch.has(answer))) {
+                    [shuffledWords[0], shuffledWords[batchSize]] = [shuffledWords[batchSize], shuffledWords[0]];
+                }
+                deck.remaining = shuffledWords;
+            }
+
+            const selectedWords = deck.remaining.splice(0, batchSize);
+            deck.previousBatch = selectedWords.map(word => word.answer);
+            decks[level] = deck;
+
+            try {
+                localStorage.setItem(storageKey, JSON.stringify(decks));
+            } catch (error) {
+                console.warn('Could not save word rotation:', error.message);
+            }
+
+            return JSON.parse(JSON.stringify(selectedWords));
+        }
+
+        // Game State
+        let gameState = {
+            currentLevel: null,
+            currentCategory: 'travel',
+            currentWordIndex: 0,
+            correct: 0,
+            skipped: 0,
+            results: [],
+            words: [],
+            currentPlayer: null,
+            allPlayers: {},
+            correctAnsweredBy: {},
+            levelStartTime: null,
+            playerFirstAnswerTime: {} // Track when each player first answers
+        };
+        let levelTimerInterval = null;
+
+        function updateLevelTimer() {
+            if (gameState.levelStartTime === null) return;
+
+            const elapsedSeconds = Math.floor((Date.now() - gameState.levelStartTime) / 1000);
+            const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+            const seconds = String(elapsedSeconds % 60).padStart(2, '0');
+            document.getElementById('gameTimer').textContent = `${minutes}:${seconds}`;
+        }
+
+        function stopLevelTimer() {
+            if (levelTimerInterval !== null) {
+                clearInterval(levelTimerInterval);
+                levelTimerInterval = null;
+            }
+        }
+
+        // Admin Panel Configuration
+        const ADMIN_PASSWORD = 'Kokey0798!';
+
+        // Initialize on page load
+        function initGame() {
+            // Show welcome modal on first load
+            showWelcomeModal();
+            // Don't show name modal automatically - wait for "Let's Play!" button click
+            loadPlayersFromStorage();
+        }
+
+        // Welcome Modal Functions
+        function showWelcomeModal() {
+            const modal = document.getElementById('welcomeModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function closeWelcomeAndShowName() {
+            const welcomeModal = document.getElementById('welcomeModal');
+            if (welcomeModal) {
+                welcomeModal.classList.add('hidden');
+            }
+            showNameModal();
+        }
+
+        function showNameModal() {
+            const modal = document.getElementById('nameModal');
+            const input = document.getElementById('playerNameInput');
+            if (modal) {
+                modal.classList.remove('hidden');
+                if (input) input.focus();
+            }
+        }
+
+        // Admin Panel Functions
+        function openAdminPanel() {
+            const adminModal = document.getElementById('adminModal');
+            const loginForm = document.getElementById('adminLoginForm');
+            const adminContent = document.getElementById('adminContent');
+            
+            if (adminModal) {
+                adminModal.style.display = 'block';
+                loginForm.style.display = 'block';
+                adminContent.style.display = 'none';
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        function closeAdminPanel() {
+            const adminModal = document.getElementById('adminModal');
+            if (adminModal) {
+                adminModal.style.display = 'none';
+            }
+        }
+
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === ADMIN_PASSWORD) {
+                document.getElementById('adminLoginForm').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadLevelWords();
+            } else {
+                alert('❌ Incorrect password!');
+                document.getElementById('adminPassword').value = '';
+                document.getElementById('adminPassword').focus();
+            }
+        }
+
+        function loadLevelWords() {
+            const level = document.getElementById('adminLevelSelect').value;
+            const words = gameData[level].words;
+            const container = document.getElementById('wordsContainer');
+            container.innerHTML = '';
+
+            words.forEach((word, index) => {
+                const wordDiv = document.createElement('div');
+                wordDiv.style.border = '1px solid #ddd';
+                wordDiv.style.padding = '15px';
+                wordDiv.style.borderRadius = '8px';
+                wordDiv.style.backgroundColor = '#f9f9f9';
+                wordDiv.innerHTML = `
+                    <h4 style="margin-bottom: 10px;">Word ${index + 1}</h4>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Scrambled:</label>
+                        <input type="text" value="${word.scrambled}" class="word-scrambled-${level}-${index}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Answer:</label>
+                        <input type="text" value="${word.answer}" class="word-answer-${level}-${index}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: 500;">Hint:</label>
+                        <input type="text" value="${word.hint}" class="word-hint-${level}-${index}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    </div>
+                `;
+                container.appendChild(wordDiv);
+            });
+        }
+
+        function saveWords() {
+            const level = document.getElementById('adminLevelSelect').value;
+            const words = gameData[level].words;
+
+            words.forEach((word, index) => {
+                word.scrambled = document.querySelector(`.word-scrambled-${level}-${index}`).value.toUpperCase();
+                word.answer = document.querySelector(`.word-answer-${level}-${index}`).value.toUpperCase();
+                word.hint = document.querySelector(`.word-hint-${level}-${index}`).value;
+            });
+
+            alert('✅ Words updated successfully!\n\nNote: Changes are saved in your browser. To make them permanent, upload this page to GitHub.');
+            console.log('Updated gameData:', gameData);
+        }
+
+        // Admin Player Management Functions
+        function switchAdminTab(tabName) {
+            // Hide all tabs
+            document.getElementById('adminWordsTab').style.display = 'none';
+            document.getElementById('adminPlayersTab').style.display = 'none';
+            
+            // Deselect all tab buttons
+            document.getElementById('tabWords').style.background = '#ddd';
+            document.getElementById('tabWords').style.color = '#333';
+            document.getElementById('tabPlayers').style.background = '#ddd';
+            document.getElementById('tabPlayers').style.color = '#333';
+            
+            // Show selected tab and highlight button
+            if (tabName === 'words') {
+                document.getElementById('adminWordsTab').style.display = 'block';
+                document.getElementById('tabWords').style.background = '#667eea';
+                document.getElementById('tabWords').style.color = 'white';
+            } else if (tabName === 'players') {
+                document.getElementById('adminPlayersTab').style.display = 'block';
+                document.getElementById('tabPlayers').style.background = '#667eea';
+                document.getElementById('tabPlayers').style.color = 'white';
+                loadInactivePlayersList();
+            }
+        }
+
+        function loadInactivePlayersList() {
+            const container = document.getElementById('inactivePlayersList');
+            container.innerHTML = '';
+            
+            if (!gameState.allPlayers || Object.keys(gameState.allPlayers).length === 0) {
+                container.innerHTML = '<p style="color: #999;">No players in game session</p>';
+                return;
+            }
+
+            const now = new Date().getTime();
+            const INACTIVE_THRESHOLD = 30000; // 30 seconds
+            
+            let hasInactive = false;
+            
+            Object.entries(gameState.allPlayers).forEach(([playerName, playerData]) => {
+                const lastActive = playerData.lastActive || playerData.joinedAt || now;
+                const timeSinceActive = now - lastActive;
+                const isInactive = timeSinceActive > INACTIVE_THRESHOLD;
+                
+                const playerDiv = document.createElement('div');
+                playerDiv.style.display = 'flex';
+                playerDiv.style.alignItems = 'center';
+                playerDiv.style.padding = '10px';
+                playerDiv.style.backgroundColor = isInactive ? '#ffe6e6' : '#e6f3ff';
+                playerDiv.style.borderRadius = '5px';
+                playerDiv.style.gap = '10px';
+                
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = 'player-' + playerName;
+                checkbox.className = 'player-checkbox';
+                checkbox.checked = isInactive; // Auto-check inactive players
+                checkbox.disabled = false; // Allow removing ANY player
+                checkbox.style.cursor = 'pointer';
+                
+                const label = document.createElement('label');
+                label.htmlFor = 'player-' + playerName;
+                label.style.flex = '1';
+                label.style.cursor = 'pointer';
+                label.style.opacity = '1';
+                
+                const statusIcon = isInactive ? '⚠️' : '✓';
+                const statusIcon = isInactive ? '⚠️' : '✓';
+                const timeSinceText = Math.round(timeSinceActive / 1000) + 's ago';
+                
+                label.innerHTML = `${statusIcon} <strong>${playerName}</strong> (${statusText}) - Last seen: ${timeSinceText} - Score: ${playerData.score}`;
+                
+                playerDiv.appendChild(checkbox);
+                playerDiv.appendChild(label);
+                container.appendChild(playerDiv);
+                
+                if (isInactive) hasInactive = true;
+            });
+            
+            if (!hasInactive) {
+                container.innerHTML += '<p style="color: #666; margin-top: 10px;">✓ All players are active! (You can still remove any player if needed)</p>';
+            }
+        }
+
+        function removeInactivePlayers() {
+            const checkboxes = document.querySelectorAll('.player-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Please select at least one player to remove');
+                return;
+            }
+            
+            const playersToRemove = Array.from(checkboxes).map(cb => cb.id.replace('player-', ''));
+            
+            if (!confirm(`Remove ${playersToRemove.length} inactive player(s)?\n\n${playersToRemove.join(', ')}`)) {
+                return;
+            }
+            
+            playersToRemove.forEach(playerName => {
+                // Remove from local state
+                delete gameState.allPlayers[playerName];
+                
+                // Remove from Firebase
+                if (db && gameSessionId && firebaseReady) {
+                    db.ref(`gameSessions/${gameSessionId}/players/${playerName}`).remove()
+                        .then(() => {
+                            console.log('✓ Removed player:', playerName);
+                        })
+                        .catch(error => {
+                            console.log('Error removing player:', error.message);
+                        });
+                }
+            });
+            
+            // Save to storage
+            savePlayersToStorage();
+            
+            // Refresh the list
+            alert(\✅ Removed \ player(s)!\);
+            loadInactivePlayersList();
+            updatePlayersDisplay();
+        }
+
+        function setPlayerName() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            gameState.currentPlayer = name;
+            document.getElementById('currentPlayerName').textContent = name;
+
+            // Add player to all players list with timestamps
+            if (!gameState.allPlayers[name]) {
+                const now = new Date().getTime();
+                gameState.allPlayers[name] = {
+                    name: name,
+                    score: 0,
+                    level: null,
+                    joinedAt: now,
+                    lastActive: now
+                };
+            }
+
+            savePlayersToStorage();
+            
+            // Start listening to Firebase for other players joining
+            startFirebaseSync();
+            
+            document.getElementById('nameModal').classList.add('hidden');
+            document.getElementById('categoryModal').style.display = 'flex';
+            document.getElementById('menuPlayersBoard').style.display = 'block';
+            updatePlayersDisplay();
+        }
+
+        function selectCategory(categoryKey) {
+            gameState.currentCategory = categoryKey;
+            document.getElementById('categoryModal').style.display = 'none';
+            document.getElementById('levelSelector').style.display = 'grid';
+        }
+
+        function startLevel(level) {
+            gameState.currentLevel = level;
+            gameState.currentWordIndex = 0;
+            gameState.correct = 0;
+            gameState.skipped = 0;
+            gameState.results = [];
+            gameState.words = getNextWordsForLevel(level);
+            gameState.correctAnsweredBy = {};
+            stopLevelTimer();
+            gameState.levelStartTime = Date.now();
+            gameState.playerFirstAnswerTime = {}; // Reset player answer times
+            document.getElementById('gameTimer').textContent = '00:00';
+            updateLevelTimer();
+            levelTimerInterval = setInterval(updateLevelTimer, 1000);
+
+            // Update player level
+            gameState.allPlayers[gameState.currentPlayer].level = level;
+            savePlayersToStorage();
+
+            // Hide level selector and show game area
+            document.getElementById('levelSelector').style.display = 'none';
+            document.getElementById('menuPlayersBoard').style.display = 'none';
+            document.getElementById('gameArea').classList.add('active');
+            document.getElementById('resultsSection').classList.remove('active');
+            document.getElementById('levelDisplay').textContent = level;
+
+            loadWord();
+        }
+
+        function loadWord() {
+            if (gameState.currentWordIndex >= gameState.words.length) {
+                showResults();
+                return;
+            }
+
+            const word = gameState.words[gameState.currentWordIndex];
+            document.getElementById('scrambledWord').textContent = word.scrambled;
+            document.getElementById('hint').textContent = word.hint;
+            document.getElementById('hint').style.display = 'none'; // Hide hint initially
+            document.getElementById('hintBtn').textContent = '💡 Show Hint'; // Reset button
+            document.getElementById('hintBtn').style.background = '#ff9800'; // Reset button color
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
+
+            updateProgress();
+            updateCorrectAnswersDisplay();
+            document.getElementById('answerInput').focus();
+        }
+
+        function toggleHint() {
+            const hint = document.getElementById('hint');
+            const hintBtn = document.getElementById('hintBtn');
+            
+            if (hint.style.display === 'none' || hint.style.display === '') {
+                // Show hint
+                hint.style.display = 'block';
+                hintBtn.textContent = '💡 Hide Hint';
+                hintBtn.style.background = '#4caf50';
+            } else {
+                // Hide hint
+                hint.style.display = 'none';
+                hintBtn.textContent = '💡 Show Hint';
+                hintBtn.style.background = '#ff9800';
+            }
+        }
+
+        function shuffleCurrentWord() {
+            const currentWord = gameState.words[gameState.currentWordIndex];
+            if (!currentWord) return;
+
+            const display = document.getElementById('scrambledWord');
+            const answer = currentWord.answer;
+            const previousArrangement = display.textContent;
+            const letters = answer.split('');
+
+            for (let attempt = 0; attempt < 20; attempt++) {
+                for (let index = letters.length - 1; index > 0; index--) {
+                    const randomIndex = Math.floor(Math.random() * (index + 1));
+                    [letters[index], letters[randomIndex]] = [letters[randomIndex], letters[index]];
+                }
+
+                const shuffledWord = letters.join('');
+                if (shuffledWord !== answer && shuffledWord !== previousArrangement) {
+                    display.textContent = shuffledWord;
+                    return;
+                }
+            }
+
+            for (let offset = 1; offset < answer.length; offset++) {
+                const rotatedWord = answer.slice(offset) + answer.slice(0, offset);
+                if (rotatedWord !== answer && rotatedWord !== previousArrangement) {
+                    display.textContent = rotatedWord;
+                    return;
+                }
+            }
+        }
+
+        function updateProgress() {
+            const total = gameState.words.length;
+            const current = gameState.currentWordIndex + 1;
+            document.getElementById('progressBar').textContent = `Word ${current} of ${total}`;
+            document.getElementById('correctCount').textContent = gameState.correct;
+            document.getElementById('skippedCount').textContent = gameState.skipped;
+            document.getElementById('progressText').textContent = `${gameState.currentWordIndex}/${total}`;
+        }
+
+        function updateCorrectAnswersDisplay() {
+            const wordIndex = gameState.currentWordIndex;
+            const correctAnswers = gameState.correctAnsweredBy[wordIndex];
+
+            const tracker = document.getElementById('answerTracker');
+            const list = document.getElementById('correctAnswersList');
+
+            if (correctAnswers && Object.keys(correctAnswers).length > 0) {
+                tracker.style.display = 'block';
+                list.innerHTML = '';
+
+                Object.entries(correctAnswers).forEach(([playerName, isCorrect]) => {
+                    if (isCorrect) {
+                        const div = document.createElement('div');
+                        div.className = 'correct-answer-entry';
+                        div.innerHTML = `
+                            <span class="answer-player-name">✓ ${playerName}</span>
+                            <span style="color: #28a745; font-weight: 600;">Got it!</span>
+                        `;
+                        list.appendChild(div);
+                    }
+                });
+            } else {
+                tracker.style.display = 'none';
+            }
+        }
+
+        function submitAnswer() {
+            const userAnswer = document.getElementById('answerInput').value.trim().toUpperCase();
+            const correctAnswer = gameState.words[gameState.currentWordIndex].answer;
+            const feedback = document.getElementById('feedback');
+
+            if (!userAnswer) {
+                feedback.textContent = 'Please enter an answer!';
+                feedback.classList.add('show', 'incorrect');
+                return;
+            }
+
+            const wordIndex = gameState.currentWordIndex;
+
+            // Initialize correctAnsweredBy for this word if not exists
+            if (!gameState.correctAnsweredBy[wordIndex]) {
+                gameState.correctAnsweredBy[wordIndex] = {};
+            }
+
+            // Record when this player first answers (only on first submission per level)
+            if (!gameState.playerFirstAnswerTime[gameState.currentPlayer]) {
+                gameState.playerFirstAnswerTime[gameState.currentPlayer] = new Date().getTime();
+            }
+
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = \✓ Correct! (\)\;
+                feedback.classList.add('show', 'correct');
+                gameState.correct++;
+                gameState.correctAnsweredBy[wordIndex][gameState.currentPlayer] = true;
+
+                gameState.results.push({
+                    word: correctAnswer,
+                    userAnswer: userAnswer,
+                    correct: true,
+                    player: gameState.currentPlayer
+                });
+
+                // Update all players' scores
+                gameState.allPlayers[gameState.currentPlayer].score++;
+            } else {
+                gameState.correctAnsweredBy[wordIndex][gameState.currentPlayer] = false;
+                feedback.textContent = \✗ Wrong! The answer is: \\;
+                feedback.classList.add('show', 'incorrect');
+                gameState.results.push({
+                    word: correctAnswer,
+                    userAnswer: userAnswer,
+                    correct: false,
+                    player: gameState.currentPlayer
+                });
+            }
+
+            updatePlayersDisplay();
+            savePlayersToStorage();
+
+            setTimeout(() => {
+                gameState.currentWordIndex++;
+                loadWord();
+            }, 1500);
+        }
+
+        function skipWord() {
+            const correctAnswer = gameState.words[gameState.currentWordIndex].answer;
+            const wordIndex = gameState.currentWordIndex;
+
+            if (!gameState.correctAnsweredBy[wordIndex]) {
+                gameState.correctAnsweredBy[wordIndex] = {};
+            }
+
+            gameState.correctAnsweredBy[wordIndex][gameState.currentPlayer] = false;
+            gameState.skipped++;
+            gameState.results.push({
+                word: correctAnswer,
+                userAnswer: 'SKIPPED',
+                correct: false,
+                player: gameState.currentPlayer
+            });
+
+            gameState.currentWordIndex++;
+            loadWord();
+        }
+
+        function togglePlayersList() {
+            const playersList = document.getElementById('playersList');
+            playersList.classList.toggle('show');
+            if (playersList.classList.contains('show')) {
+                updatePlayersDisplay();
+            }
+        }
+
+        function updatePlayersDisplay() {
+            const scoreboards = [
+                document.getElementById('playersScoreBoard'),
+                document.getElementById('menuPlayersScoreBoard')
+            ].filter(Boolean);
+            if (scoreboards.length === 0) return;
+
+            scoreboards.forEach(scoreboard => {
+                scoreboard.innerHTML = '';
+            });
+
+            // Sort players by score
+            const sortedPlayers = Object.values(gameState.allPlayers)
+                .sort((a, b) => b.score - a.score);
+
+            if (sortedPlayers.length === 0) {
+                scoreboards.forEach(scoreboard => {
+                    scoreboard.innerHTML = '<p style="color: #666;">No players yet. Start playing!</p>';
+                });
+                return;
+            }
+
+            sortedPlayers.forEach(player => {
+                scoreboards.forEach(scoreboard => {
+                    const div = document.createElement('div');
+                    div.className = `player-score-item ${player.name === gameState.currentPlayer ? 'current' : ''}`;
+                    div.innerHTML = `
+                        <span class="player-name">${player.name}</span>
+                        <span class="player-score">${player.score}</span>
+                    `;
+                    scoreboard.appendChild(div);
+                });
+            });
+        }
+
+        function showResults() {
+            stopLevelTimer();
+            updateLevelTimer();
+            document.getElementById('gameArea').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+
+            // Display leaderboard
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            leaderboardContent.innerHTML = '';
+
+            // Sort players by score, then by answer time (who answered first)
+            const sortedPlayers = Object.values(gameState.allPlayers)
+                .map(player => ({
+                    ...player,
+                    answerTime: gameState.playerFirstAnswerTime[player.name] || Infinity
+                }))
+                .sort((a, b) => {
+                    // Primary: by score (highest first)
+                    if (b.score !== a.score) return b.score - a.score;
+                    // Secondary: by answer time (earliest first)
+                    return a.answerTime - b.answerTime;
+                });
+
+            sortedPlayers.forEach((player, index) => {
+                const div = document.createElement('div');
+                const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
+                div.className = `leaderboard-entry ${rankClass}`;
+                
+                // Calculate response time in seconds
+                const responseTime = gameState.playerFirstAnswerTime[player.name] 
+                    ? ((gameState.playerFirstAnswerTime[player.name] - gameState.levelStartTime) / 1000).toFixed(1)
+                    : '—';
+                
+                div.innerHTML = `
+                    <span class="leaderboard-rank ${rankClass}"></span>
+                    <span class="leaderboard-player">${player.name}</span>
+                    <span class="leaderboard-score">${player.score}</span>
+                    <span style="font-size: 0.85em; color: #666;">⏱ ${responseTime}s</span>
+                `;
+                leaderboardContent.appendChild(div);
+            });
+
+            // Display results for current player
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = '<h3 style="margin-bottom: 15px; color: #333;">Your Results:</h3>';
+
+            gameState.results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = `result-item ${result.correct ? 'correct' : 'incorrect'}`;
+                div.innerHTML = `
+                    <div class="result-word">${result.word}</div>
+                    <div class="result-answer">Your answer: ${result.userAnswer}</div>
+                `;
+                resultsList.appendChild(div);
+            });
+        }
+
+        function resetGameToMenu() {
+            stopLevelTimer();
+            gameState.currentLevel = null;
+            gameState.currentWordIndex = 0;
+            gameState.correct = 0;
+            gameState.skipped = 0;
+            gameState.results = [];
+            gameState.words = [];
+            gameState.correctAnsweredBy = {};
+            gameState.levelStartTime = null;
+            gameState.playerFirstAnswerTime = {};
+            document.getElementById('gameTimer').textContent = '00:00';
+
+            // Hide all modals
+            document.getElementById('welcomeModal').classList.add('hidden');
+            document.getElementById('nameModal').classList.add('hidden');
+            
+            // Show category selector
+            document.getElementById('categoryModal').style.display = 'flex';
+            document.getElementById('menuPlayersBoard').style.display = 'block';
+            document.getElementById('gameArea').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+        }
+
+        function resetGame() {
+            stopLevelTimer();
+            document.getElementById('gameTimer').textContent = '00:00';
+            // Clear only game session data, preserve all players
+            const preservedPlayers = gameState.allPlayers;
+            const preservedCategory = gameState.currentCategory;
+            
+            gameState = {
+                currentLevel: null,
+                currentCategory: preservedCategory,
+                currentWordIndex: 0,
+                correct: 0,
+                skipped: 0,
+                results: [],
+                words: [],
+                currentPlayer: null,
+                allPlayers: preservedPlayers,
+                correctAnsweredBy: {}
+            };
+
+            document.getElementById('nameModal').classList.remove('hidden');
+            document.getElementById('playerNameInput').value = '';
+            document.getElementById('playerNameInput').focus();
+            document.getElementById('levelSelector').style.display = 'none';
+            document.getElementById('categoryModal').style.display = 'none';
+            document.getElementById('menuPlayersBoard').style.display = 'none';
+            document.getElementById('gameArea').classList.remove('active');
+            document.getElementById('resultsSection').classList.remove('active');
+        }
+
+        // Database Functions - Firebase + Local Storage Fallback
+        function generateSessionId() {
+            // Use a fixed session ID so all players share the same game session
+            return 'default_game_session';
+        }
+
+        function startFirebaseSync() {
+            // Start listening to Firebase for real-time player updates
+            if (db && gameSessionId) {
+                console.log('Starting Firebase sync for session:', gameSessionId);
+                db.ref(`gameSessions/${gameSessionId}/players`).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    console.log('Raw Firebase data:', data);
+                    
+                    if (data && typeof data === 'object') {
+                        // Filter out null, undefined, or invalid player data
+                        const activePlayers = {};
+                        const now = new Date().getTime();
+                        const TIMEOUT_MS = 30000; // Remove players inactive for 30+ seconds
+                        
+                        Object.entries(data).forEach(([playerName, playerData]) => {
+                            // Strictly validate player data
+                            if (!playerData || 
+                                playerData === null || 
+                                typeof playerData !== 'object' ||
+                                !playerData.name ||
+                                playerData.score === null ||
+                                playerData.score === undefined) {
+                                console.log('✗ Rejected (invalid):', playerName, playerData);
+                                return; // Skip this player
+                            }
+                            
+                            // Check if player is still active (within 30 seconds)
+                            const lastActive = playerData.lastActive || playerData.joinedAt || now;
+                            const timeSinceActive = now - lastActive;
+                            
+                            if (timeSinceActive > TIMEOUT_MS) {
+                                console.log('✗ Rejected (inactive >30s):', playerName, 'Last active:', timeSinceActive + 'ms ago');
+                                // Try to remove this stale player
+                                db.ref(`gameSessions/${gameSessionId}/players/${playerName}`).remove().catch(err => {
+                                    console.log('Stale player cleanup error:', err);
+                                });
+                                return; // Skip this player
+                            }
+                            
+                            // Player passed all checks - add to active list
+                            activePlayers[playerName] = playerData;
+                            console.log('✓ Added player:', playerName, 'Score:', playerData.score, 'Last active:', timeSinceActive + 'ms ago');
+                        });
+                        
+                        console.log('Active players after filter:', Object.keys(activePlayers));
+                        gameState.allPlayers = activePlayers;
+                        updatePlayersDisplay();
+                    } else {
+                        gameState.allPlayers = {};
+                        updatePlayersDisplay();
+                    }
+                });
+                
+                // Send heartbeat every 5 seconds to show player is active
+                setInterval(() => {
+                    if (gameState.currentPlayer && firebaseReady) {
+                        const playerPath = `gameSessions/${gameSessionId}/players/${gameState.currentPlayer}`;
+                        db.ref(playerPath).update({ 
+                            lastActive: new Date().getTime() 
+                        }).catch(error => {
+                            console.log('Heartbeat send (non-critical):', error.message);
+                        });
+                    }
+                }, 5000);
+            } else {
+                console.log('Firebase not ready for sync');
+            }
+        }
+
+        function savePlayersToStorage() {
+            // Save locally first (always)
+            localStorage.setItem('wordGamePlayers', JSON.stringify(gameState.allPlayers));
+            
+            // If Firebase is available, also sync to database
+            if (db && gameSessionId) {
+                const updates = {};
+                Object.keys(gameState.allPlayers).forEach(playerName => {
+                    updates[`gameSessions/${gameSessionId}/players/${playerName}`] = gameState.allPlayers[playerName];
+                });
+                db.ref().update(updates).catch(error => {
+                    console.log('Firebase sync (non-critical):', error.message);
+                });
+            }
+        }
+
+        function loadPlayersFromStorage() {
+            // Try Firebase first (if available and has session)
+            if (db && gameSessionId) {
+                db.ref(`gameSessions/${gameSessionId}/players`).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        gameState.allPlayers = data;
+                    } else {
+                        gameState.allPlayers = {};
+                    }
+                    updatePlayersDisplay();
+                });
+            } else {
+                // Fallback to local storage
+                const stored = localStorage.getItem('wordGamePlayers');
+                if (stored) {
+                    gameState.allPlayers = JSON.parse(stored);
+                }
+                updatePlayersDisplay();
+            }
+        }
+
+        // Initialize game on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Firebase first
+            initializeFirebase();
+            
+            // Generate a unique session ID for this game session
+            gameSessionId = generateSessionId();
+            
+            // Give Firebase a moment to initialize, then start the game
+            setTimeout(function() {
+                initGame();
+            }, 500);
+
+            // Remove player from leaderboard when they close/leave the page
+            window.addEventListener('beforeunload', function() {
+                if (gameState.currentPlayer && db && gameSessionId && firebaseReady) {
+                    const playerPath = `gameSessions/${gameSessionId}/players/${gameState.currentPlayer}`;
+                    
+                    // Use remove() to completely delete the player record
+                    try {
+                        db.ref(playerPath).remove(function(error) {
+                            if (error) {
+                                console.log('Player removal error:', error.message);
+                            } else {
+                                console.log('Player removed successfully:', gameState.currentPlayer);
+                            }
+                        });
+                    } catch (error) {
+                        console.log('Auto-cleanup beforeunload:', error.message);
+                    }
+                }
+            });
+
+            // Also remove player if they navigate away
+            window.addEventListener('unload', function() {
+                if (gameState.currentPlayer && db && gameSessionId && firebaseReady) {
+                    try {
+                        db.ref(`gameSessions/${gameSessionId}/players/${gameState.currentPlayer}`).remove();
+                    } catch (error) {
+                        console.log('Unload cleanup:', error.message);
+                    }
+                }
+            });
+
+            // Detect when user closes browser tab (not 100% reliable but helps)
+            window.addEventListener('pagehide', function() {
+                if (gameState.currentPlayer && db && gameSessionId && firebaseReady) {
+                    try {
+                        db.ref(`gameSessions/${gameSessionId}/players/${gameState.currentPlayer}`).remove();
+                    } catch (error) {
+                        console.log('Pagehide cleanup:', error.message);
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
