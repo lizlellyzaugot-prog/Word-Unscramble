@@ -1412,12 +1412,8 @@
 
         // Initialize on page load
         function initGame() {
-            // Only show welcome modal on first visit
-            const hasSeenWelcome = localStorage.getItem('wordGameWelcomeSeen');
-            if (!hasSeenWelcome) {
-                showWelcomeModal();
-                localStorage.setItem('wordGameWelcomeSeen', 'true');
-            }
+            // Show welcome modal on first load
+            showWelcomeModal();
             // Don't show name modal automatically - wait for "Let's Play!" button click
             loadPlayersFromStorage();
         }
