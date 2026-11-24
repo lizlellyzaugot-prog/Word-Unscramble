@@ -122,6 +122,61 @@
             margin-bottom: 30px;
         }
 
+        .category-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .category-btn {
+            padding: 20px;
+            font-size: 1.1em;
+            border: 2px solid #ddd;
+            background: white;
+            color: #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .category-btn-emoji {
+            font-size: 2em;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .category-btn-name {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .category-btn-desc {
+            display: block;
+            font-size: 0.8em;
+            font-weight: 400;
+            color: #666;
+        }
+
+        .category-btn.active .category-btn-desc {
+            color: #e0e0e0;
+        }
+
         .menu-players-board {
             display: none;
             margin-top: 20px;
@@ -826,6 +881,36 @@
             </div>
         </div>
 
+        <!-- Category Selection Modal -->
+        <div class="modal" id="categoryModal" style="display: none;">
+            <div class="modal-content">
+                <h2>Select a Category 📚</h2>
+                <p style="margin-bottom: 20px;">Choose a category to begin playing</p>
+                <div class="category-selector">
+                    <button class="category-btn" onclick="selectCategory('travel')">
+                        <span class="category-btn-emoji">✈️</span>
+                        <span class="category-btn-name">Travel</span>
+                        <span class="category-btn-desc">Aviation & Tourism</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('politics')">
+                        <span class="category-btn-emoji">🗳️</span>
+                        <span class="category-btn-name">Philippine Politics</span>
+                        <span class="category-btn-desc">Government & Politics</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('geography')">
+                        <span class="category-btn-emoji">🗺️</span>
+                        <span class="category-btn-name">Asian Geography</span>
+                        <span class="category-btn-desc">Towns & Countries</span>
+                    </button>
+                    <button class="category-btn" onclick="selectCategory('animals')">
+                        <span class="category-btn-emoji">🦁</span>
+                        <span class="category-btn-name">Animals</span>
+                        <span class="category-btn-desc">Wildlife & Creatures</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Level Selection -->
         <div class="level-selector" id="levelSelector" style="display: none;">
             <button class="level-btn" onclick="startLevel(1)">
@@ -1046,58 +1131,220 @@
             }
         }
 
-        // Game Data
-        const gameData = {
-            1: {
-                name: 'Easy',
-                words: [
-                    { scrambled: 'SKED', answer: 'DESK', hint: 'Laging inaagaw ng CLAIMS' },
-                    { scrambled: 'PIRT', answer: 'TRIP', hint: 'A journey to another place' },
-                    { scrambled: 'PAMS', answer: 'MAPS', hint: 'Helps you find your destination' },
-                    { scrambled: 'RDAC', answer: 'CARD', hint: 'You might use this to pay while traveling' },
-                    { scrambled: 'OTPR', answer: 'PORT', hint: 'A place where ships arrive and depart' },
-                    { scrambled: 'XITA', answer: 'TAXI', hint: 'A car you can hire to take you somewhere' },
-                    { scrambled: 'TEAG', answer: 'GATE', hint: 'Where passengers wait to board' },
-                    { scrambled: 'BCA', answer: 'CAB', hint: 'Another word for a taxi' },
-                    { scrambled: 'NATIR', answer: 'TRAIN', hint: 'A vehicle that runs on railway tracks' },
-                    { scrambled: 'SBU', answer: 'BUS', hint: 'A road vehicle that carries many passengers' }
-                ]
+        // Game Data - Organized by Categories
+        const categories = {
+            travel: {
+                name: '✈️ Travel',
+                description: 'Words about travel and tourism',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'SKED', answer: 'DESK', hint: 'Laging inaagaw ng CLAIMS' },
+                            { scrambled: 'PIRT', answer: 'TRIP', hint: 'A journey to another place' },
+                            { scrambled: 'PAMS', answer: 'MAPS', hint: 'Helps you find your destination' },
+                            { scrambled: 'RDAC', answer: 'CARD', hint: 'You might use this to pay while traveling' },
+                            { scrambled: 'OTPR', answer: 'PORT', hint: 'A place where ships arrive and depart' },
+                            { scrambled: 'XITA', answer: 'TAXI', hint: 'A car you can hire to take you somewhere' },
+                            { scrambled: 'TEAG', answer: 'GATE', hint: 'Where passengers wait to board' },
+                            { scrambled: 'BCA', answer: 'CAB', hint: 'Another word for a taxi' },
+                            { scrambled: 'NATIR', answer: 'TRAIN', hint: 'A vehicle that runs on railway tracks' },
+                            { scrambled: 'SBU', answer: 'BUS', hint: 'A road vehicle that carries many passengers' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'OETLH', answer: 'HOTEL', hint: 'Where travelers stay overnight' },
+                            { scrambled: 'KTEICT', answer: 'TICKET', hint: "Proof that you're booked to travel" },
+                            { scrambled: 'GENTSA', answer: 'AGENTS', hint: 'They can help arrange travel' },
+                            { scrambled: 'IKOSK', answer: 'KIOSK', hint: 'Self-service machine found at airports' },
+                            { scrambled: 'UEQUE', answer: 'QUEUE', hint: 'A line of passengers waiting' },
+                            { scrambled: 'BICAN', answer: 'CABIN', hint: 'The passenger area inside an aircraft' },
+                            { scrambled: 'YAWUNR', answer: 'RUNWAY', hint: 'The strip where aircraft take off and land' },
+                            { scrambled: 'TOLPI', answer: 'PILOT', hint: 'The person who flies an aircraft' },
+                            { scrambled: 'GYAVOE', answer: 'VOYAGE', hint: 'A long journey, often by sea' },
+                            { scrambled: 'STUOSMC', answer: 'CUSTOMS', hint: 'Where travelers declare goods at a border' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'RANIIETRY', answer: 'ITINERARY', hint: 'Your detailed travel schedule' },
+                            { scrambled: 'RUTDEPAER', answer: 'DEPARTURE', hint: 'When your flight leaves' },
+                            { scrambled: 'RIFCTAAR', answer: 'AIRCRAFT', hint: 'The vehicle used to fly passengers' },
+                            { scrambled: 'DASUAME', answer: 'AMADEUS', hint: 'where you work' },
+                            { scrambled: 'SROPPATS', answer: 'PASSPORT', hint: 'Required for most international travel' },
+                            { scrambled: 'TNASTIR', answer: 'TRANSIT', hint: 'Travel through or across a place' },
+                            { scrambled: 'TADENOSINTI', answer: 'DESTINATION', hint: 'The place you are traveling to' },
+                            { scrambled: 'NOCETCINON', answer: 'CONNECTION', hint: 'A transfer between two travel services' },
+                            { scrambled: 'LIMREANT', answer: 'TERMINAL', hint: 'A passenger building at an airport' },
+                            { scrambled: 'NNOIATVIGA', answer: 'NAVIGATION', hint: 'Finding and following a route' }
+                        ]
+                    }
+                }
             },
-            2: {
-                name: 'Moderate',
-                words: [
-                    { scrambled: 'OETLH', answer: 'HOTEL', hint: 'Where travelers stay overnight' },
-                    { scrambled: 'KTEICT', answer: 'TICKET', hint: "Proof that you're booked to travel" },
-                    { scrambled: 'GENTSA', answer: 'AGENTS', hint: 'They can help arrange travel' },
-                    { scrambled: 'IKOSK', answer: 'KIOSK', hint: 'Self-service machine found at airports' },
-                    { scrambled: 'UEQUE', answer: 'QUEUE', hint: 'A line of passengers waiting' },
-                    { scrambled: 'BICAN', answer: 'CABIN', hint: 'The passenger area inside an aircraft' },
-                    { scrambled: 'YAWUNR', answer: 'RUNWAY', hint: 'The strip where aircraft take off and land' },
-                    { scrambled: 'TOLPI', answer: 'PILOT', hint: 'The person who flies an aircraft' },
-                    { scrambled: 'GYAVOE', answer: 'VOYAGE', hint: 'A long journey, often by sea' },
-                    { scrambled: 'STUOSMC', answer: 'CUSTOMS', hint: 'Where travelers declare goods at a border' }
-                ]
+            politics: {
+                name: '🗳️ Philippine Politics',
+                description: 'Words about Philippine politics and government',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'TOVE', answer: 'VOTE', hint: 'Cast your ballot in an election' },
+                            { scrambled: 'WALO', answer: 'ALLOW', hint: 'Permission to do something' },
+                            { scrambled: 'WOLI', answer: 'WILL', hint: 'Determination and purpose' },
+                            { scrambled: 'WALO', answer: 'LAWS', hint: 'Rules set by the government' },
+                            { scrambled: 'ETNSA', answer: 'SENATE', hint: 'Upper chamber of Congress' },
+                            { scrambled: 'RPEISDN', answer: 'RESIDENT', hint: 'Person living in a place' },
+                            { scrambled: 'SSEM', answer: 'MESS', hint: 'Disorderly situation' },
+                            { scrambled: 'LIACMIT', answer: 'CLIMATE', hint: 'Weather patterns of a region' },
+                            { scrambled: 'GNIRU', answer: 'RING', hint: 'Circular band' },
+                            { scrambled: 'RLAPU', answer: 'PLURAL', hint: 'More than one' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'LAITNEDNEP', answer: 'PRESIDENTIAL', hint: 'Relating to the president' },
+                            { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Based on the constitution' },
+                            { scrambled: 'NAMONAROHC', answer: 'MONARCHY', hint: 'Government ruled by a king or queen' },
+                            { scrambled: 'CEREDNOP', answer: 'PRECEDENT', hint: 'An earlier decision used as an example' },
+                            { scrambled: 'TSEIGLLEP', answer: 'PELLETISE', hint: 'To form into pellets' },
+                            { scrambled: 'TNEMAILRAP', answer: 'PARLIAMENT', hint: 'Body of government officials' },
+                            { scrambled: 'NOITCELESNI', answer: 'SENILECTION', hint: 'Process of choosing leaders' },
+                            { scrambled: 'YRTSNIM', answer: 'MINISTRY', hint: 'Government department' },
+                            { scrambled: 'TNESERPER', answer: 'REPRESENT', hint: 'To act on behalf of others' },
+                            { scrambled: 'TNEMECNESERP', answer: 'SENESCENCE', hint: 'Process of growing old' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'TLACILBO', answer: 'OBLITICAL', hint: 'Relating to politics' },
+                            { scrambled: 'YASNOITUTITSNOC', answer: 'CONSTITUTIONALS', hint: 'Supporters of constitutional monarchy' },
+                            { scrambled: 'YCAROMITAP', answer: 'PATRIOMACY', hint: 'Rule by the father figure' },
+                            { scrambled: 'YROTSGELAGISEN', answer: 'LEGISLATIVE STORY', hint: 'Laws and regulations' },
+                            { scrambled: 'LACITSOPULUPORAP', answer: 'POPULARULITICAL', hint: 'Appeal to the people' },
+                            { scrambled: 'TNEMEVOM', answer: 'MOVEMENT', hint: 'Group action towards a goal' },
+                            { scrambled: 'YACIRCAMBLED', answer: 'DEMOCRACY', hint: 'Government by the people' },
+                            { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Relating to the constitution' },
+                            { scrambled: 'YRTSINIMDNITSA', answer: 'ADMINISTRATION', hint: 'Management of government' },
+                            { scrambled: 'NOITUCESORP', answer: 'PROSECUTION', hint: 'Legal pursuit of a case' }
+                        ]
+                    }
+                }
             },
-            3: {
-                name: 'Difficult',
-                words: [
-                    { scrambled: 'RANIIETRY', answer: 'ITINERARY', hint: 'Your detailed travel schedule' },
-                    { scrambled: 'RUTDEPAER', answer: 'DEPARTURE', hint: 'When your flight leaves' },
-                    { scrambled: 'RIFCTAAR', answer: 'AIRCRAFT', hint: 'The vehicle used to fly passengers' },
-                    { scrambled: 'DASUAME', answer: 'AMADEUS', hint: 'where you work' },
-                    { scrambled: 'SROPPATS', answer: 'PASSPORT', hint: 'Required for most international travel' },
-                    { scrambled: 'TNASTIR', answer: 'TRANSIT', hint: 'Travel through or across a place' },
-                    { scrambled: 'TADENOSINTI', answer: 'DESTINATION', hint: 'The place you are traveling to' },
-                    { scrambled: 'NOCETCINON', answer: 'CONNECTION', hint: 'A transfer between two travel services' },
-                    { scrambled: 'LIMREANT', answer: 'TERMINAL', hint: 'A passenger building at an airport' },
-                    { scrambled: 'NNOIATVIGA', answer: 'NAVIGATION', hint: 'Finding and following a route' }
-                ]
+            geography: {
+                name: '🗺️ Asian Geography',
+                description: 'Towns, cities and countries in Philippines and Asia',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'GNUAMN', answer: 'MANILA', hint: 'Capital of the Philippines' },
+                            { scrambled: 'SAINA', answer: 'ASIAN', hint: 'Relating to Asia' },
+                            { scrambled: 'NAPAIJ', answer: 'JAPAN', hint: 'Country with Mount Fuji' },
+                            { scrambled: 'HAITZ', answer: 'HAITI', hint: 'Caribbean island nation' },
+                            { scrambled: 'LANIDNI', answer: 'INDIA', hint: 'Large Asian country' },
+                            { scrambled: 'INAHC', answer: 'CHINA', hint: 'Most populous country in Asia' },
+                            { scrambled: 'LEUOS', answer: 'SEOUL', hint: 'Capital of South Korea' },
+                            { scrambled: 'GNABKOB', answer: 'BANGKOK', hint: 'Capital of Thailand' },
+                            { scrambled: 'NALMI', answer: 'HANOI', hint: 'Capital of Vietnam' },
+                            { scrambled: 'KCAT', answer: 'TACK', hint: 'Small nail' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'GNILEUAC', answer: 'CEBU', hint: 'Island in the Philippines' },
+                            { scrambled: 'IGAL', answer: 'ILOILO', hint: 'City in Western Visayas' },
+                            { scrambled: 'OLYZADL', answer: 'DAVAO', hint: 'City in Mindanao' },
+                            { scrambled: 'ALYGAB', answer: 'BAGUIO', hint: 'City known for cool climate' },
+                            { scrambled: 'LOPIBGINA', answer: 'BINALOANG', hint: 'Island in Mindanao' },
+                            { scrambled: 'ANGKBO', answer: 'BANGKOK', hint: 'Capital of Thailand' },
+                            { scrambled: 'GAPSNI', answer: 'SINGAPORE', hint: 'City-state in Southeast Asia' },
+                            { scrambled: 'AYAMSAL', answer: 'MALAYSIA', hint: 'Country in Southeast Asia' },
+                            { scrambled: 'AIDNONI', answer: 'INDONESIA', hint: 'Largest archipelago in the world' },
+                            { scrambled: 'NOMYNAN', answer: 'MYANMAR', hint: 'Country formerly known as Burma' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'GELAMACISAP', answer: 'MEGAPOLICIES', hint: 'Large-scale regional strategies' },
+                            { scrambled: 'GALIROPIHPILIP', answer: 'PHILIPPINE', hint: 'Relating to the Philippines' },
+                            { scrambled: 'ARALANIPAIGOR', answer: 'GEOGRAPHICAL', hint: 'Related to geography' },
+                            { scrambled: 'GALEPESGIL', answer: 'ARCHIPELAGO', hint: 'Group of islands' },
+                            { scrambled: 'NASIALPOPSE', answer: 'GEOPOLITICAL', hint: 'Political relations between regions' },
+                            { scrambled: 'LANOIGEHCIRAG', answer: 'GEOGRAPHICAL', hint: 'Study of regions and places' },
+                            { scrambled: 'LANOITANRETNI', answer: 'INTERNATIONAL', hint: 'Between nations' },
+                            { scrambled: 'NAGILERUALIPIP', answer: 'PHILIPPINE', hint: 'Of the Philippines' },
+                            { scrambled: 'ALACIGAER', answer: 'REGIONAL', hint: 'Relating to a specific area' },
+                            { scrambled: 'LANOITUTITNI', answer: 'INSTITUTIONAL', hint: 'Related to institutions' }
+                        ]
+                    }
+                }
+            },
+            animals: {
+                name: '🦁 Animals',
+                description: 'Names of animals from around the world',
+                levels: {
+                    1: {
+                        name: 'Easy',
+                        words: [
+                            { scrambled: 'TAC', answer: 'CAT', hint: 'A small furry pet that meows' },
+                            { scrambled: 'GOD', answer: 'DOG', hint: 'Man\'s best friend' },
+                            { scrambled: 'RIZIAB', answer: 'ZEBRA', hint: 'African animal with black and white stripes' },
+                            { scrambled: 'RABE', answer: 'BEAR', hint: 'Large furry animal that hibernates' },
+                            { scrambled: 'OWL', answer: 'OWL', hint: 'Nocturnal bird that hoots' },
+                            { scrambled: 'EKANS', answer: 'SNAKE', hint: 'Reptile with no legs' },
+                            { scrambled: 'NOLIF', answer: 'LION', hint: 'The king of the jungle' },
+                            { scrambled: 'TIGRE', answer: 'TIGER', hint: 'Orange striped big cat' },
+                            { scrambled: 'REHSIF', answer: 'FISH', hint: 'Aquatic animal with gills' },
+                            { scrambled: 'RIERD', answer: 'REINDEER', hint: 'Animal that pulls Santa\'s sleigh' }
+                        ]
+                    },
+                    2: {
+                        name: 'Moderate',
+                        words: [
+                            { scrambled: 'HTAELP', answer: 'ELEPHANT', hint: 'Large animal with a long trunk' },
+                            { scrambled: 'RAFFIG', answer: 'GIRAFFE', hint: 'Tallest animal with a long neck' },
+                            { scrambled: 'ROCOCDORC', answer: 'CROCODILE', hint: 'Reptile with many teeth' },
+                            { scrambled: 'TABBIR', answer: 'RABBIT', hint: 'Small furry animal with long ears' },
+                            { scrambled: 'PIHPOPO', answer: 'HIPPOPOTAMUS', hint: 'Large river animal' },
+                            { scrambled: 'KUNOCM', answer: 'MONKEY', hint: 'Primate that swings in trees' },
+                            { scrambled: 'TREPRAP', answer: 'PARROT', hint: 'Colorful bird that can talk' },
+                            { scrambled: 'NSLEAPH', answer: 'PHEASANT', hint: 'Colorful game bird' },
+                            { scrambled: 'ORPSEIH', answer: 'GORSE', hint: 'Spiny shrub' },
+                            { scrambled: 'HTARTSUO', answer: 'OSTRICH', hint: 'Largest flightless bird' }
+                        ]
+                    },
+                    3: {
+                        name: 'Difficult',
+                        words: [
+                            { scrambled: 'SSERAPECIHC', answer: 'CHIMPANZEES', hint: 'Our closest relatives in the animal kingdom' },
+                            { scrambled: 'RITINASORNAC', answer: 'CARNIVOROUS', hint: 'Animals that eat meat' },
+                            { scrambled: 'TRONIACHLAT', answer: 'NOCTURNAL', hint: 'Animals that are active at night' },
+                            { scrambled: 'RIEPREDICAP', answer: 'PREDATOR', hint: 'Animal that hunts others' },
+                            { scrambled: 'REBLLIPOGITA', answer: 'TARANTULA', hint: 'Large hairy spider' },
+                            { scrambled: 'SSELOBRASC', answer: 'SCORPION', hint: 'Arachnid with a poisonous tail' },
+                            { scrambled: 'SOTAMIHCROM', answer: 'ANTHROPOID', hint: 'Human-like primate' },
+                            { scrambled: 'NITARUQ', answer: 'QUAGGA', hint: 'Extinct striped equine' },
+                            { scrambled: 'SAITLLEM', answer: 'MAMMALS', hint: 'Warm-blooded animals with fur' },
+                            { scrambled: 'SRUALSAR', answer: 'SAUROPOD', hint: 'Large long-necked dinosaur' }
+                        ]
+                    }
+                }
             }
         };
 
+        // Legacy gameData for backward compatibility
+        const gameData = categories.travel.levels;
+
         function getNextWordsForLevel(level) {
             const batchSize = 5;
-            const storageKey = 'wordGameWordDecks';
+            const storageKey = `wordGameWordDecks_${gameState.currentCategory}`;
             let decks = {};
 
             try {
@@ -1111,7 +1358,9 @@
                 : { remaining: [], previousBatch: [] };
 
             if (deck.remaining.length < batchSize) {
-                const shuffledWords = [...gameData[level].words];
+                const categoryData = categories[gameState.currentCategory];
+                const levelData = categoryData.levels[level];
+                const shuffledWords = [...levelData.words];
                 for (let index = shuffledWords.length - 1; index > 0; index--) {
                     const randomIndex = Math.floor(Math.random() * (index + 1));
                     [shuffledWords[index], shuffledWords[randomIndex]] = [shuffledWords[randomIndex], shuffledWords[index]];
@@ -1141,6 +1390,7 @@
         // Game State
         let gameState = {
             currentLevel: null,
+            currentCategory: 'travel',
             currentWordIndex: 0,
             correct: 0,
             skipped: 0,
@@ -1443,9 +1693,15 @@
             startFirebaseSync();
             
             document.getElementById('nameModal').classList.add('hidden');
-            document.getElementById('levelSelector').style.display = 'grid';
+            document.getElementById('categoryModal').style.display = 'flex';
             document.getElementById('menuPlayersBoard').style.display = 'block';
             updatePlayersDisplay();
+        }
+
+        function selectCategory(categoryKey) {
+            gameState.currentCategory = categoryKey;
+            document.getElementById('categoryModal').style.display = 'none';
+            document.getElementById('levelSelector').style.display = 'grid';
         }
 
         function startLevel(level) {
@@ -1774,7 +2030,12 @@
             gameState.playerFirstAnswerTime = {};
             document.getElementById('gameTimer').textContent = '00:00';
 
-            document.getElementById('levelSelector').style.display = 'grid';
+            // Hide all modals
+            document.getElementById('welcomeModal').classList.add('hidden');
+            document.getElementById('nameModal').classList.add('hidden');
+            
+            // Show category selector
+            document.getElementById('categoryModal').style.display = 'flex';
             document.getElementById('menuPlayersBoard').style.display = 'block';
             document.getElementById('gameArea').classList.remove('active');
             document.getElementById('resultsSection').classList.remove('active');
@@ -1785,9 +2046,11 @@
             document.getElementById('gameTimer').textContent = '00:00';
             // Clear only game session data, preserve all players
             const preservedPlayers = gameState.allPlayers;
+            const preservedCategory = gameState.currentCategory;
             
             gameState = {
                 currentLevel: null,
+                currentCategory: preservedCategory,
                 currentWordIndex: 0,
                 correct: 0,
                 skipped: 0,
@@ -1802,6 +2065,7 @@
             document.getElementById('playerNameInput').value = '';
             document.getElementById('playerNameInput').focus();
             document.getElementById('levelSelector').style.display = 'none';
+            document.getElementById('categoryModal').style.display = 'none';
             document.getElementById('menuPlayersBoard').style.display = 'none';
             document.getElementById('gameArea').classList.remove('active');
             document.getElementById('resultsSection').classList.remove('active');
