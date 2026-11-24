@@ -599,15 +599,15 @@
         }
 
         .leaderboard-rank.first::before {
-            content: '🥇';
+            content: 'ðŸ¥‡';
         }
 
         .leaderboard-rank.second::before {
-            content: '🥈';
+            content: 'ðŸ¥ˆ';
         }
 
         .leaderboard-rank.third::before {
-            content: '🥉';
+            content: 'ðŸ¥‰';
         }
 
         .leaderboard-player {
@@ -824,19 +824,19 @@
 <body>
     <div class="container" style="position: relative;">
         <div style="position: absolute; top: 20px; right: 20px;">
-            <button class="btn-admin" onclick="openAdminPanel()" style="background: #667eea; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">⚙️ Admin</button>
+            <button class="btn-admin" onclick="openAdminPanel()" style="background: #667eea; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 0.9em;">âš™ï¸ Admin</button>
         </div>
-        <h1>🎮 Word Unscramble</h1>
+        <h1>ðŸŽ® Word Unscramble</h1>
 
         <!-- Welcome/Instructions Modal -->
         <div class="modal" id="welcomeModal">
             <div class="modal-content welcome-modal-content">
-                <h2>📖 How to Play</h2>
+                <h2>ðŸ“– How to Play</h2>
                 <div class="welcome-instructions">
-                    <h3>🎯 Objective</h3>
+                    <h3>ðŸŽ¯ Objective</h3>
                     <p>Unscramble the letters to find the correct word. Answer as many as you can!</p>
                     
-                    <h3>🎮 How It Works</h3>
+                    <h3>ðŸŽ® How It Works</h3>
                     <ol style="padding-left: 20px;">
                         <li><strong>Enter your name</strong> to join the game</li>
                         <li><strong>Choose a difficulty level</strong>: Easy, Moderate, or Difficult</li>
@@ -846,14 +846,14 @@
                         <li><strong>View the leaderboard</strong> to see all players' scores in real-time</li>
                     </ol>
                     
-                    <h3>⭐ Multiplayer Features</h3>
+                    <h3>â­ Multiplayer Features</h3>
                     <ul style="padding-left: 20px;">
-                        <li>👥 <strong>Live Leaderboard</strong> - See all players' scores</li>
-                        <li>🏆 <strong>First-to-Answer Tracking</strong> - See who solved each word first</li>
-                        <li>📊 <strong>Real-time Sync</strong> - Scores update instantly across all devices</li>
+                        <li>ðŸ‘¥ <strong>Live Leaderboard</strong> - See all players' scores</li>
+                        <li>ðŸ† <strong>First-to-Answer Tracking</strong> - See who solved each word first</li>
+                        <li>ðŸ“Š <strong>Real-time Sync</strong> - Scores update instantly across all devices</li>
                     </ul>
                     
-                    <h3>💡 Tips</h3>
+                    <h3>ðŸ’¡ Tips</h3>
                     <ul style="padding-left: 20px;">
                         <li>Use the <strong>Hint</strong> button if you get stuck</li>
                         <li>You can <strong>Skip</strong> any word you don't know</li>
@@ -861,14 +861,14 @@
                         <li>Compete with your colleagues in real-time!</li>
                     </ul>
                 </div>
-                <button class="btn btn-submit" onclick="closeWelcomeAndShowName()" style="width: 100%; margin-top: 20px;">Let's Play! 🚀</button>
+                <button class="btn btn-submit" onclick="closeWelcomeAndShowName()" style="width: 100%; margin-top: 20px;">Let's Play! ðŸš€</button>
             </div>
         </div>
 
         <!-- Player Name Modal -->
         <div class="modal hidden" id="nameModal">
             <div class="modal-content">
-                <h2>Welcome! 👋</h2>
+                <h2>Welcome! ðŸ‘‹</h2>
                 <p>Enter your name to start playing</p>
                 <input 
                     type="text" 
@@ -884,26 +884,26 @@
         <!-- Category Selection Modal -->
         <div class="modal" id="categoryModal" style="display: none;">
             <div class="modal-content">
-                <h2>Select a Category 📚</h2>
+                <h2>Select a Category ðŸ“š</h2>
                 <p style="margin-bottom: 20px;">Choose a category to begin playing</p>
                 <div class="category-selector">
                     <button class="category-btn" onclick="selectCategory('travel')">
-                        <span class="category-btn-emoji">✈️</span>
+                        <span class="category-btn-emoji">âœˆï¸</span>
                         <span class="category-btn-name">Travel</span>
                         <span class="category-btn-desc">Aviation & Tourism</span>
                     </button>
                     <button class="category-btn" onclick="selectCategory('politics')">
-                        <span class="category-btn-emoji">🗳️</span>
+                        <span class="category-btn-emoji">ðŸ—³ï¸</span>
                         <span class="category-btn-name">Philippine Politics</span>
                         <span class="category-btn-desc">Government & Politics</span>
                     </button>
                     <button class="category-btn" onclick="selectCategory('geography')">
-                        <span class="category-btn-emoji">🗺️</span>
+                        <span class="category-btn-emoji">ðŸ—ºï¸</span>
                         <span class="category-btn-name">Asian Geography</span>
                         <span class="category-btn-desc">Towns & Countries</span>
                     </button>
                     <button class="category-btn" onclick="selectCategory('animals')">
-                        <span class="category-btn-emoji">🦁</span>
+                        <span class="category-btn-emoji">ðŸ¦</span>
                         <span class="category-btn-name">Animals</span>
                         <span class="category-btn-desc">Wildlife & Creatures</span>
                     </button>
@@ -936,20 +936,20 @@
         <div class="game-area" id="gameArea">
             <div class="game-header">
                 <div class="player-info">
-                    <span class="current-player">👤 <span id="currentPlayerName">Player</span></span>
+                    <span class="current-player">ðŸ‘¤ <span id="currentPlayerName">Player</span></span>
                 </div>
                 <div style="flex: 1; text-align: center;">
                     <div style="font-weight: 600; color: #333;">Level <span id="levelDisplay">1</span></div>
                 </div>
                 <div style="text-align: right;">
-                    <button class="btn-players-list" onclick="togglePlayersList()">👥 Players</button>
+                    <button class="btn-players-list" onclick="togglePlayersList()">ðŸ‘¥ Players</button>
                 </div>
             </div>
 
             <div class="players-list" id="playersList">
-                <h3>🏆 Players & Scores</h3>
+                <h3>ðŸ† Players & Scores</h3>
                 <div id="playersScoreBoard"></div>
-                <button class="btn-close-players" onclick="togglePlayersList()">✕</button>
+                <button class="btn-close-players" onclick="togglePlayersList()">âœ•</button>
             </div>
 
             <div class="score-board">
@@ -977,15 +977,15 @@
                 <div class="scrambled-word" id="scrambledWord">EXAMPLE</div>
                 <div class="hint" id="hint" style="display: none;"></div>
                 <div class="word-actions">
-                    <button class="btn btn-hint" id="hintBtn" onclick="toggleHint()">💡 Show Hint</button>
-                    <button class="btn btn-skip" onclick="shuffleCurrentWord()">🔀 Shuffle Letters</button>
+                    <button class="btn btn-hint" id="hintBtn" onclick="toggleHint()">ðŸ’¡ Show Hint</button>
+                    <button class="btn btn-skip" onclick="shuffleCurrentWord()">ðŸ”€ Shuffle Letters</button>
                 </div>
             </div>
 
             <div class="feedback" id="feedback"></div>
 
             <div class="answer-tracker" id="answerTracker" style="display: none;">
-                <div style="font-weight: 600; margin-bottom: 10px;">✓ Correct Answers:</div>
+                <div style="font-weight: 600; margin-bottom: 10px;">âœ“ Correct Answers:</div>
                 <div id="correctAnswersList"></div>
             </div>
 
@@ -1009,10 +1009,10 @@
 
         <!-- Results Section -->
         <div class="results-section" id="resultsSection">
-            <h2>🎉 Level Complete!</h2>
+            <h2>ðŸŽ‰ Level Complete!</h2>
 
             <div class="final-leaderboard" id="finalLeaderboard">
-                <h3>🏆 Final Leaderboard</h3>
+                <h3>ðŸ† Final Leaderboard</h3>
                 <div id="leaderboardContent"></div>
             </div>
 
@@ -1027,7 +1027,7 @@
         <!-- Admin Panel Modal -->
         <div class="modal" id="adminModal" style="display: none;">
             <div class="modal-content" style="max-width: 700px; max-height: 90vh; overflow-y: auto;">
-                <h2>🔐 Admin Panel - Update Words</h2>
+                <h2>ðŸ” Admin Panel - Update Words</h2>
                 
                 <div id="adminLoginForm">
                     <p>Enter admin password:</p>
@@ -1044,8 +1044,8 @@
                 <div id="adminContent" style="display: none;">
                     <!-- Admin Tabs -->
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #ddd;">
-                        <button id="tabWords" class="admin-tab" onclick="switchAdminTab('words')" style="flex: 1; padding: 10px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">✏️ Edit Words</button>
-                        <button id="tabPlayers" class="admin-tab" onclick="switchAdminTab('players')" style="flex: 1; padding: 10px; background: #ddd; color: #333; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">👥 Manage Players</button>
+                        <button id="tabWords" class="admin-tab" onclick="switchAdminTab('words')" style="flex: 1; padding: 10px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">âœï¸ Edit Words</button>
+                        <button id="tabPlayers" class="admin-tab" onclick="switchAdminTab('players')" style="flex: 1; padding: 10px; background: #ddd; color: #333; border: none; cursor: pointer; border-radius: 5px 5px 0 0;">ðŸ‘¥ Manage Players</button>
                     </div>
 
                     <!-- Words Tab -->
@@ -1064,21 +1064,21 @@
                         </div>
 
                         <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <button class="btn btn-submit" onclick="saveWords()" style="width: 100%;">💾 Save Changes</button>
+                            <button class="btn btn-submit" onclick="saveWords()" style="width: 100%;">ðŸ’¾ Save Changes</button>
                             <button class="btn btn-skip" onclick="closeAdminPanel()" style="width: 100%;">Close</button>
                         </div>
                     </div>
 
                     <!-- Players Tab -->
                     <div id="adminPlayersTab" style="display: none;">
-                        <h3 style="margin-bottom: 15px;">🧹 Remove Inactive Players</h3>
+                        <h3 style="margin-bottom: 15px;">ðŸ§¹ Remove Inactive Players</h3>
                         
                         <div style="margin-bottom: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px;">
                             <p style="margin-bottom: 10px;"><strong>Current Players:</strong></p>
                             <div id="inactivePlayersList" style="display: grid; gap: 8px; margin-bottom: 10px;">
                                 <p style="color: #666;">Loading players...</p>
                             </div>
-                            <button class="btn btn-submit" onclick="removeInactivePlayers()" style="width: 100%;">🗑️ Remove Selected Inactive Players</button>
+                            <button class="btn btn-submit" onclick="removeInactivePlayers()" style="width: 100%;">ðŸ—‘ï¸ Remove Selected Inactive Players</button>
                         </div>
 
                         <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1192,30 +1192,28 @@
                         name: 'Easy',
                         words: [
                             { scrambled: 'TOVE', answer: 'VOTE', hint: 'Cast your ballot in an election' },
-                            { scrambled: 'WALO', answer: 'ALLOW', hint: 'Permission to do something' },
-                            { scrambled: 'WOLI', answer: 'WILL', hint: 'Determination and purpose' },
-                            { scrambled: 'WALO', answer: 'LAWS', hint: 'Rules set by the government' },
+                            { scrambled: 'WALLO', answer: 'ALLOW', hint: 'Permission to do something' },
+                            { scrambled: 'WLLI', answer: 'WILL', hint: 'Determination and purpose' },
+                            { scrambled: 'WALS', answer: 'LAWS', hint: 'Rules set by the government' },
                             { scrambled: 'ETNSA', answer: 'SENATE', hint: 'Upper chamber of Congress' },
-                            { scrambled: 'RPEISDN', answer: 'RESIDENT', hint: 'Person living in a place' },
+                            { scrambled: 'RTEISDN', answer: 'RESIDENT', hint: 'Person living in a place' },
                             { scrambled: 'SSEM', answer: 'MESS', hint: 'Disorderly situation' },
                             { scrambled: 'LIACMIT', answer: 'CLIMATE', hint: 'Weather patterns of a region' },
-                            { scrambled: 'GNIRU', answer: 'RING', hint: 'Circular band' },
+                            { scrambled: 'GNIR', answer: 'RING', hint: 'Circular band' },
                             { scrambled: 'RLAPU', answer: 'PLURAL', hint: 'More than one' }
                         ]
                     },
                     2: {
                         name: 'Moderate',
                         words: [
-                            { scrambled: 'LAITNEDNEP', answer: 'PRESIDENTIAL', hint: 'Relating to the president' },
+                            { scrambled: 'NATRESDIIPEL', answer: 'PRESIDENTIAL', hint: 'Relating to the president' },
                             { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Based on the constitution' },
-                            { scrambled: 'NAMONAROHC', answer: 'MONARCHY', hint: 'Government ruled by a king or queen' },
-                            { scrambled: 'CEREDNOP', answer: 'PRECEDENT', hint: 'An earlier decision used as an example' },
-                            { scrambled: 'TSEIGLLEP', answer: 'PELLETISE', hint: 'To form into pellets' },
+                            { scrambled: 'YRCHANOM', answer: 'MONARCHY', hint: 'Government ruled by a king or queen' },
+                            { scrambled: 'TERCEDPEN', answer: 'PRECEDENT', hint: 'An earlier decision used as an example' },
                             { scrambled: 'TNEMAILRAP', answer: 'PARLIAMENT', hint: 'Body of government officials' },
-                            { scrambled: 'NOITCELESNI', answer: 'SENILECTION', hint: 'Process of choosing leaders' },
-                            { scrambled: 'YRTSNIM', answer: 'MINISTRY', hint: 'Government department' },
+                            { scrambled: 'YRTSINIM', answer: 'MINISTRY', hint: 'Government department' },
                             { scrambled: 'TNESERPER', answer: 'REPRESENT', hint: 'To act on behalf of others' },
-                            { scrambled: 'TNEMECNESERP', answer: 'SENESCENCE', hint: 'Process of growing old' }
+                            { scrambled: 'DORCILCEO', answer: 'CROCODILE', hint: 'A large aquatic reptile with powerful jaws' }
                         ]
                     },
                     3: {
@@ -1224,12 +1222,12 @@
                             { scrambled: 'TLACILBO', answer: 'OBLITICAL', hint: 'Relating to politics' },
                             { scrambled: 'YASNOITUTITSNOC', answer: 'CONSTITUTIONALS', hint: 'Supporters of constitutional monarchy' },
                             { scrambled: 'YCAROMITAP', answer: 'PATRIOMACY', hint: 'Rule by the father figure' },
-                            { scrambled: 'YROTSGELAGISEN', answer: 'LEGISLATIVE STORY', hint: 'Laws and regulations' },
-                            { scrambled: 'LACITSOPULUPORAP', answer: 'POPULARULITICAL', hint: 'Appeal to the people' },
+                            { scrambled: 'RABK ROLPER', answer: 'PORK BARREL', hint: 'Government spending directed toward local projects' },
+                            { scrambled: 'RUPTOCRION', answer: 'CORRUPTION', hint: 'Dishonest or illegal use of power for personal gain' },
                             { scrambled: 'TNEMEVOM', answer: 'MOVEMENT', hint: 'Group action towards a goal' },
-                            { scrambled: 'YACIRCAMBLED', answer: 'DEMOCRACY', hint: 'Government by the people' },
+                            { scrambled: 'MECYROADC', answer: 'DEMOCRACY', hint: 'Government by the people' },
                             { scrambled: 'LANOITUTITSNOC', answer: 'CONSTITUTIONAL', hint: 'Relating to the constitution' },
-                            { scrambled: 'YRTSINIMDNITSA', answer: 'ADMINISTRATION', hint: 'Management of government' },
+                            { scrambled: 'TIDRANIMOSATIN', answer: 'ADMINISTRATION', hint: 'Management of government' },
                             { scrambled: 'NOITUCESORP', answer: 'PROSECUTION', hint: 'Legal pursuit of a case' }
                         ]
                     }
@@ -1242,46 +1240,41 @@
                     1: {
                         name: 'Easy',
                         words: [
-                            { scrambled: 'GNUAMN', answer: 'MANILA', hint: 'Capital of the Philippines' },
+                            { scrambled: 'ALIMAN', answer: 'MANILA', hint: 'Capital of the Philippines' },
                             { scrambled: 'SAINA', answer: 'ASIAN', hint: 'Relating to Asia' },
-                            { scrambled: 'NAPAIJ', answer: 'JAPAN', hint: 'Country with Mount Fuji' },
-                            { scrambled: 'HAITZ', answer: 'HAITI', hint: 'Caribbean island nation' },
-                            { scrambled: 'LANIDNI', answer: 'INDIA', hint: 'Large Asian country' },
+                            { scrambled: 'NAPAJ', answer: 'JAPAN', hint: 'Country with Mount Fuji' },
+                            { scrambled: 'HAITI', answer: 'HAITI', hint: 'Caribbean island nation' },
+                            { scrambled: 'AIDNI', answer: 'INDIA', hint: 'Large Asian country' },
                             { scrambled: 'INAHC', answer: 'CHINA', hint: 'Most populous country in Asia' },
                             { scrambled: 'LEUOS', answer: 'SEOUL', hint: 'Capital of South Korea' },
-                            { scrambled: 'GNABKOB', answer: 'BANGKOK', hint: 'Capital of Thailand' },
-                            { scrambled: 'NALMI', answer: 'HANOI', hint: 'Capital of Vietnam' },
-                            { scrambled: 'KCAT', answer: 'TACK', hint: 'Small nail' }
+                            { scrambled: 'GNABKOK', answer: 'BANGKOK', hint: 'Capital of Thailand' },
+                            { scrambled: 'OIHNA', answer: 'HANOI', hint: 'Capital of Vietnam' }
                         ]
                     },
                     2: {
                         name: 'Moderate',
                         words: [
-                            { scrambled: 'GNILEUAC', answer: 'CEBU', hint: 'Island in the Philippines' },
-                            { scrambled: 'IGAL', answer: 'ILOILO', hint: 'City in Western Visayas' },
-                            { scrambled: 'OLYZADL', answer: 'DAVAO', hint: 'City in Mindanao' },
-                            { scrambled: 'ALYGAB', answer: 'BAGUIO', hint: 'City known for cool climate' },
-                            { scrambled: 'LOPIBGINA', answer: 'BINALOANG', hint: 'Island in Mindanao' },
-                            { scrambled: 'ANGKBO', answer: 'BANGKOK', hint: 'Capital of Thailand' },
-                            { scrambled: 'GAPSNI', answer: 'SINGAPORE', hint: 'City-state in Southeast Asia' },
-                            { scrambled: 'AYAMSAL', answer: 'MALAYSIA', hint: 'Country in Southeast Asia' },
-                            { scrambled: 'AIDNONI', answer: 'INDONESIA', hint: 'Largest archipelago in the world' },
-                            { scrambled: 'NOMYNAN', answer: 'MYANMAR', hint: 'Country formerly known as Burma' }
+                            { scrambled: 'OLLIIO', answer: 'ILOILO', hint: 'City in Western Visayas' },
+                            { scrambled: 'AODVA', answer: 'DAVAO', hint: 'City in Mindanao' },
+                            { scrambled: 'UGABIO', answer: 'BAGUIO', hint: 'A Philippine city known for its cool climate and mountain scenery' },
+                            { scrambled: 'GAPOSNIRE', answer: 'SINGAPORE', hint: 'A city-state in Southeast Asia known for Marina Bay and its modern skyline' },
+                            { scrambled: 'YASAMAIL', answer: 'MALAYSIA', hint: 'A Southeast Asian country known for the Petronas Twin Towers' },
+                            { scrambled: 'SIAODNENI', answer: 'INDONESIA', hint: 'A Southeast Asian country made up of thousands of islands' },
+                            { scrambled: 'RYANMAM', answer: 'MYANMAR', hint: 'A Southeast Asian country formerly known as Burma' }
                         ]
                     },
                     3: {
                         name: 'Difficult',
                         words: [
                             { scrambled: 'GELAMACISAP', answer: 'MEGAPOLICIES', hint: 'Large-scale regional strategies' },
-                            { scrambled: 'GALIROPIHPILIP', answer: 'PHILIPPINE', hint: 'Relating to the Philippines' },
-                            { scrambled: 'ARALANIPAIGOR', answer: 'GEOGRAPHICAL', hint: 'Related to geography' },
-                            { scrambled: 'GALEPESGIL', answer: 'ARCHIPELAGO', hint: 'Group of islands' },
-                            { scrambled: 'NASIALPOPSE', answer: 'GEOPOLITICAL', hint: 'Political relations between regions' },
-                            { scrambled: 'LANOIGEHCIRAG', answer: 'GEOGRAPHICAL', hint: 'Study of regions and places' },
+                            { scrambled: 'ENIPPILIHIP', answer: 'PHILIPPINE', hint: 'Relating to the Philippines' },
+                            { scrambled: 'LACIHPARGEOG', answer: 'GEOGRAPHICAL', hint: 'Related to geography' },
+                            { scrambled: 'OGALEPIHCRA', answer: 'ARCHIPELAGO', hint: 'Group of islands' },
+                            { scrambled: 'LACITILOPGEO', answer: 'GEOPOLITICAL', hint: 'Political relations between regions' },
+                            { scrambled: 'LACIHPARGGEO', answer: 'GEOGRAPHICAL', hint: 'Study of regions and places' },
                             { scrambled: 'LANOITANRETNI', answer: 'INTERNATIONAL', hint: 'Between nations' },
-                            { scrambled: 'NAGILERUALIPIP', answer: 'PHILIPPINE', hint: 'Of the Philippines' },
-                            { scrambled: 'ALACIGAER', answer: 'REGIONAL', hint: 'Relating to a specific area' },
-                            { scrambled: 'LANOITUTITNI', answer: 'INSTITUTIONAL', hint: 'Related to institutions' }
+                            { scrambled: 'LANIOREG', answer: 'REGIONAL', hint: 'Relating to a specific area' },
+                            { scrambled: 'LANIOTUTITSIN', answer: 'INSTITUTIONAL', hint: 'Related to institutions' }
                         ]
                     }
                 }
@@ -1295,51 +1288,45 @@
                         words: [
                             { scrambled: 'TAC', answer: 'CAT', hint: 'A small furry pet that meows' },
                             { scrambled: 'GOD', answer: 'DOG', hint: 'Man\'s best friend' },
-                            { scrambled: 'RIZIAB', answer: 'ZEBRA', hint: 'African animal with black and white stripes' },
+                            { scrambled: 'ARBEZ', answer: 'ZEBRA', hint: 'African animal with black and white stripes' },
                             { scrambled: 'RABE', answer: 'BEAR', hint: 'Large furry animal that hibernates' },
                             { scrambled: 'OWL', answer: 'OWL', hint: 'Nocturnal bird that hoots' },
                             { scrambled: 'EKANS', answer: 'SNAKE', hint: 'Reptile with no legs' },
-                            { scrambled: 'NOLIF', answer: 'LION', hint: 'The king of the jungle' },
+                            { scrambled: 'ONIL', answer: 'LION', hint: 'The king of the jungle' },
                             { scrambled: 'TIGRE', answer: 'TIGER', hint: 'Orange striped big cat' },
-                            { scrambled: 'REHSIF', answer: 'FISH', hint: 'Aquatic animal with gills' },
-                            { scrambled: 'RIERD', answer: 'REINDEER', hint: 'Animal that pulls Santa\'s sleigh' }
+                            { scrambled: 'HSIF', answer: 'FISH', hint: 'Aquatic animal with gills' },
+                            { scrambled: 'RIERDEEN', answer: 'REINDEER', hint: 'Animal that pulls Santa\'s sleigh' }
                         ]
                     },
                     2: {
                         name: 'Moderate',
                         words: [
-                            { scrambled: 'HTAELP', answer: 'ELEPHANT', hint: 'Large animal with a long trunk' },
-                            { scrambled: 'RAFFIG', answer: 'GIRAFFE', hint: 'Tallest animal with a long neck' },
-                            { scrambled: 'ROCOCDORC', answer: 'CROCODILE', hint: 'Reptile with many teeth' },
+                            { scrambled: 'TNAPHELE', answer: 'ELEPHANT', hint: 'Large animal with a long trunk' },
+                            { scrambled: 'RAFFIGE', answer: 'GIRAFFE', hint: 'Tallest animal with a long neck' },
+                            { scrambled: 'ROCOCDERIL', answer: 'CROCODILE', hint: 'Reptile with many teeth' },
                             { scrambled: 'TABBIR', answer: 'RABBIT', hint: 'Small furry animal with long ears' },
-                            { scrambled: 'PIHPOPO', answer: 'HIPPOPOTAMUS', hint: 'Large river animal' },
-                            { scrambled: 'KUNOCM', answer: 'MONKEY', hint: 'Primate that swings in trees' },
-                            { scrambled: 'TREPRAP', answer: 'PARROT', hint: 'Colorful bird that can talk' },
-                            { scrambled: 'NSLEAPH', answer: 'PHEASANT', hint: 'Colorful game bird' },
-                            { scrambled: 'ORPSEIH', answer: 'GORSE', hint: 'Spiny shrub' },
-                            { scrambled: 'HTARTSUO', answer: 'OSTRICH', hint: 'Largest flightless bird' }
+                            { scrambled: 'PATOPHIMSUP', answer: 'HIPPOPOTAMUS', hint: 'A large African mammal that spends much of its time in water' },
+                            { scrambled: 'YEKNOM', answer: 'MONKEY', hint: 'Primate that swings in trees' },
+                            { scrambled: 'TORRAP', answer: 'PARROT', hint: 'Colorful bird that can talk' },
+                            { scrambled: 'HCIRTSO', answer: 'OSTRICH', hint: 'Largest flightless bird' }
                         ]
                     },
                     3: {
                         name: 'Difficult',
                         words: [
-                            { scrambled: 'SSERAPECIHC', answer: 'CHIMPANZEES', hint: 'Our closest relatives in the animal kingdom' },
-                            { scrambled: 'RITINASORNAC', answer: 'CARNIVOROUS', hint: 'Animals that eat meat' },
-                            { scrambled: 'TRONIACHLAT', answer: 'NOCTURNAL', hint: 'Animals that are active at night' },
-                            { scrambled: 'RIEPREDICAP', answer: 'PREDATOR', hint: 'Animal that hunts others' },
-                            { scrambled: 'REBLLIPOGITA', answer: 'TARANTULA', hint: 'Large hairy spider' },
-                            { scrambled: 'SSELOBRASC', answer: 'SCORPION', hint: 'Arachnid with a poisonous tail' },
-                            { scrambled: 'SOTAMIHCROM', answer: 'ANTHROPOID', hint: 'Human-like primate' },
-                            { scrambled: 'NITARUQ', answer: 'QUAGGA', hint: 'Extinct striped equine' },
-                            { scrambled: 'SAITLLEM', answer: 'MAMMALS', hint: 'Warm-blooded animals with fur' },
-                            { scrambled: 'SRUALSAR', answer: 'SAUROPOD', hint: 'Large long-necked dinosaur' }
+                            { scrambled: 'PESZCEHNAEIM', answer: 'CHIMPANZEES', hint: 'Our closest relatives in the animal kingdom' },
+                            { scrambled: 'VORUCRIANOS', answer: 'CARNIVOROUS', hint: 'Animals that eat meat' },
+                            { scrambled: 'TURNCONAL', answer: 'NOCTURNAL', hint: 'Animals that are active at night' },
+                            { scrambled: 'DROTERAP', answer: 'PREDATOR', hint: 'Animal that hunts others' },
+                            { scrambled: 'RATANUTAL', answer: 'TARANTULA', hint: 'Large hairy spider' },
+                            { scrambled: 'ROCPIONS', answer: 'SCORPION', hint: 'Arachnid with a poisonous tail' },
+                            { scrambled: 'SMMAALM', answer: 'MAMMALS', hint: 'Warm-blooded animals with fur' }
                         ]
                     }
                 }
             }
         };
 
-        // Legacy gameData for backward compatibility
         const gameData = categories.travel.levels;
 
         function getNextWordsForLevel(level) {
@@ -1489,7 +1476,7 @@
                 document.getElementById('adminContent').style.display = 'block';
                 loadLevelWords();
             } else {
-                alert('❌ Incorrect password!');
+                alert('âŒ Incorrect password!');
                 document.getElementById('adminPassword').value = '';
                 document.getElementById('adminPassword').focus();
             }
@@ -1536,7 +1523,7 @@
                 word.hint = document.querySelector(`.word-hint-${level}-${index}`).value;
             });
 
-            alert('✅ Words updated successfully!\n\nNote: Changes are saved in your browser. To make them permanent, upload this page to GitHub.');
+            alert('âœ… Words updated successfully!\n\nNote: Changes are saved in your browser. To make them permanent, upload this page to GitHub.');
             console.log('Updated gameData:', gameData);
         }
 
@@ -1606,7 +1593,7 @@
                 label.style.cursor = 'pointer';
                 label.style.opacity = '1';
                 
-                const statusIcon = isInactive ? '⚠️' : '✓';
+                const statusIcon = isInactive ? 'âš ï¸' : 'âœ“';
                 const statusText = isInactive ? 'INACTIVE' : 'ACTIVE';
                 const timeSinceText = Math.round(timeSinceActive / 1000) + 's ago';
                 
@@ -1620,7 +1607,7 @@
             });
             
             if (!hasInactive) {
-                container.innerHTML += '<p style="color: #666; margin-top: 10px;">✓ All players are active! (You can still remove any player if needed)</p>';
+                container.innerHTML += '<p style="color: #666; margin-top: 10px;">âœ“ All players are active! (You can still remove any player if needed)</p>';
             }
         }
 
@@ -1646,7 +1633,7 @@
                 if (db && gameSessionId && firebaseReady) {
                     db.ref(`gameSessions/${gameSessionId}/players/${playerName}`).remove()
                         .then(() => {
-                            console.log('✓ Removed player:', playerName);
+                            console.log('âœ“ Removed player:', playerName);
                         })
                         .catch(error => {
                             console.log('Error removing player:', error.message);
@@ -1658,7 +1645,7 @@
             savePlayersToStorage();
             
             // Refresh the list
-            alert(`✅ Removed ${playersToRemove.length} player(s)!`);
+            alert(`âœ… Removed ${playersToRemove.length} player(s)!`);
             loadInactivePlayersList();
             updatePlayersDisplay();
         }
@@ -1741,7 +1728,7 @@
             document.getElementById('scrambledWord').textContent = word.scrambled;
             document.getElementById('hint').textContent = word.hint;
             document.getElementById('hint').style.display = 'none'; // Hide hint initially
-            document.getElementById('hintBtn').textContent = '💡 Show Hint'; // Reset button
+            document.getElementById('hintBtn').textContent = 'ðŸ’¡ Show Hint'; // Reset button
             document.getElementById('hintBtn').style.background = '#ff9800'; // Reset button color
             document.getElementById('answerInput').value = '';
             document.getElementById('feedback').classList.remove('show', 'correct', 'incorrect');
@@ -1758,12 +1745,12 @@
             if (hint.style.display === 'none' || hint.style.display === '') {
                 // Show hint
                 hint.style.display = 'block';
-                hintBtn.textContent = '💡 Hide Hint';
+                hintBtn.textContent = 'ðŸ’¡ Hide Hint';
                 hintBtn.style.background = '#4caf50';
             } else {
                 // Hide hint
                 hint.style.display = 'none';
-                hintBtn.textContent = '💡 Show Hint';
+                hintBtn.textContent = 'ðŸ’¡ Show Hint';
                 hintBtn.style.background = '#ff9800';
             }
         }
@@ -1824,7 +1811,7 @@
                         const div = document.createElement('div');
                         div.className = 'correct-answer-entry';
                         div.innerHTML = `
-                            <span class="answer-player-name">✓ ${playerName}</span>
+                            <span class="answer-player-name">âœ“ ${playerName}</span>
                             <span style="color: #28a745; font-weight: 600;">Got it!</span>
                         `;
                         list.appendChild(div);
@@ -1859,7 +1846,7 @@
             }
 
             if (userAnswer === correctAnswer) {
-                feedback.textContent = `✓ Correct! (${gameState.currentPlayer})`;
+                feedback.textContent = `âœ“ Correct! (${gameState.currentPlayer})`;
                 feedback.classList.add('show', 'correct');
                 gameState.correct++;
                 gameState.correctAnsweredBy[wordIndex][gameState.currentPlayer] = true;
@@ -1875,7 +1862,7 @@
                 gameState.allPlayers[gameState.currentPlayer].score++;
             } else {
                 gameState.correctAnsweredBy[wordIndex][gameState.currentPlayer] = false;
-                feedback.textContent = `✗ Wrong! The answer is: ${correctAnswer}`;
+                feedback.textContent = `âœ— Wrong! The answer is: ${correctAnswer}`;
                 feedback.classList.add('show', 'incorrect');
                 gameState.results.push({
                     word: correctAnswer,
@@ -1989,13 +1976,13 @@
                 // Calculate response time in seconds
                 const responseTime = gameState.playerFirstAnswerTime[player.name] 
                     ? ((gameState.playerFirstAnswerTime[player.name] - gameState.levelStartTime) / 1000).toFixed(1)
-                    : '—';
+                    : 'â€”';
                 
                 div.innerHTML = `
                     <span class="leaderboard-rank ${rankClass}"></span>
                     <span class="leaderboard-player">${player.name}</span>
                     <span class="leaderboard-score">${player.score}</span>
-                    <span style="font-size: 0.85em; color: #666;">⏱ ${responseTime}s</span>
+                    <span style="font-size: 0.85em; color: #666;">â± ${responseTime}s</span>
                 `;
                 leaderboardContent.appendChild(div);
             });
@@ -2097,7 +2084,7 @@
                                 !playerData.name ||
                                 playerData.score === null ||
                                 playerData.score === undefined) {
-                                console.log('✗ Rejected (invalid):', playerName, playerData);
+                                console.log('âœ— Rejected (invalid):', playerName, playerData);
                                 return; // Skip this player
                             }
                             
@@ -2106,7 +2093,7 @@
                             const timeSinceActive = now - lastActive;
                             
                             if (timeSinceActive > TIMEOUT_MS) {
-                                console.log('✗ Rejected (inactive >30s):', playerName, 'Last active:', timeSinceActive + 'ms ago');
+                                console.log('âœ— Rejected (inactive >30s):', playerName, 'Last active:', timeSinceActive + 'ms ago');
                                 // Try to remove this stale player
                                 db.ref(`gameSessions/${gameSessionId}/players/${playerName}`).remove().catch(err => {
                                     console.log('Stale player cleanup error:', err);
@@ -2116,7 +2103,7 @@
                             
                             // Player passed all checks - add to active list
                             activePlayers[playerName] = playerData;
-                            console.log('✓ Added player:', playerName, 'Score:', playerData.score, 'Last active:', timeSinceActive + 'ms ago');
+                            console.log('âœ“ Added player:', playerName, 'Score:', playerData.score, 'Last active:', timeSinceActive + 'ms ago');
                         });
                         
                         console.log('Active players after filter:', Object.keys(activePlayers));
@@ -2240,3 +2227,4 @@
     </script>
 </body>
 </html>
+
