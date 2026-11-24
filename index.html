@@ -4,27 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Word Unscramble Game</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
-        .modal { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .admin-btn-top { position: absolute; top: 20px; right: 20px; padding: 8px 15px; background: #667eea; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        .admin-btn-top:hover { background: #764ba2; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal.hidden { display: none !important; }
         .modal-content {
             background: white;
             border-radius: 15px;
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
         }
-        .hidden { display: none !important; }
         button {
             background: #667eea;
             color: white;
@@ -33,11 +38,15 @@
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            margin-top: 20px;
+            margin: 10px 0;
             width: 100%;
         }
         button:hover { background: #764ba2; }
+        button.secondary { background: #ddd; color: #333; }
+        button.secondary:hover { background: #bbb; }
         h1 { margin-bottom: 20px; color: #333; }
+        h2 { margin: 20px 0 15px 0; color: #333; font-size: 1.3em; }
+        h3 { margin: 15px 0 10px 0; color: #333; }
         p { color: #666; margin-bottom: 15px; line-height: 1.6; }
         input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
         .category-btn { background: #f0f0f0; color: #333; padding: 15px; margin: 10px 0; text-align: left; }
@@ -45,54 +54,191 @@
         .word-display { font-size: 48px; font-weight: bold; letter-spacing: 10px; color: #333; margin: 30px 0; text-align: center; }
         .gamearea { display: none; }
         .gamearea.active { display: block; }
+        .game-layout { display: grid; grid-template-columns: 1fr 250px; gap: 20px; }
+        .game-left { background: white; padding: 30px; border-radius: 15px; }
+        .game-right { background: white; padding: 20px; border-radius: 15px; }
+        .score-board { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .score-item { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .score-label { color: #666; font-size: 0.9em; }
+        .score-value { font-size: 28px; font-weight: bold; color: #667eea; }
+        .timer { font-size: 24px; font-weight: bold; text-align: center; color: #667eea; }
+        .leaderboard { margin-top: 20px; }
+        .leaderboard-title { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .player-row { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; font-size: 0.9em; }
+        .player-name { font-weight: 600; }
+        .player-score { color: #667eea; font-weight: bold; }
+        .feedback { font-weight: bold; margin: 15px 0; }
+        .admin-tab { margin-bottom: 15px; }
+        .word-edit { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; }
+        .word-edit input { margin: 5px 0; }
+        .player-checkbox { margin: 10px 0; }
+        .player-checkbox input { width: auto; margin-right: 10px; }
+        .player-checkbox label { margin-left: 5px; }
+        .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
-    <!-- Welcome Modal -->
-    <div id="welcomeModal" class="modal">
-        <div class="modal-content">
-            <h1>🎮 Word Unscramble Game</h1>
-            <p>Unscramble the letters to find the correct word!</p>
-            <p>Choose your difficulty level and try to guess as many words as you can.</p>
-            <button onclick="goToNameInput()">Let's Play! 🚀</button>
-        </div>
-    </div>
+    <button class="admin-btn-top" onclick="openAdminPanel()">⚙️ Admin</button>
 
-    <!-- Name Input Modal -->
-    <div id="nameModal" class="modal hidden">
-        <div class="modal-content">
-            <h1>Welcome!</h1>
-            <p>Enter your name:</p>
-            <input type="text" id="playerName" placeholder="Your name" autofocus>
-            <button onclick="goToCategories()">Continue</button>
+    <div class="container">
+        <!-- Welcome Modal -->
+        <div id="welcomeModal" class="modal">
+            <div class="modal-content">
+                <h1>🎮 Word Unscramble Game</h1>
+                <p>Unscramble the letters to find the correct word!</p>
+                <p>Choose your difficulty level and try to guess as many words as you can.</p>
+                <p>Compete with your colleagues in real-time!</p>
+                <button onclick="goToNameInput()">Let's Play! 🚀</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Category Selection -->
-    <div id="categoryModal" class="modal hidden">
-        <div class="modal-content">
-            <h1>Select Category</h1>
-            <button class="category-btn" onclick="startGame('travel')">✈️ Travel</button>
-            <button class="category-btn" onclick="startGame('politics')">🗳️ Philippine Politics</button>
-            <button class="category-btn" onclick="startGame('geography')">🗺️ Asian Geography</button>
-            <button class="category-btn" onclick="startGame('animals')">🦁 Animals</button>
+        <!-- Name Input Modal -->
+        <div id="nameModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>Welcome!</h1>
+                <p>Enter your name:</p>
+                <input type="text" id="playerName" placeholder="Your name" autofocus>
+                <button onclick="goToCategories()">Continue</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Game Area -->
-    <div id="gameArea" class="modal gamearea">
-        <div class="modal-content">
-            <h1 id="gameTitle">Level 1</h1>
-            <p id="playerInfo">Player: <span id="playerNameDisplay">Player</span></p>
-            <div class="word-display" id="scrambledWord">EXAMPLE</div>
-            <input type="text" id="answerInput" placeholder="Type your answer" autofocus>
-            <button onclick="checkAnswer()">Submit Answer</button>
-            <button onclick="skipWord()">Skip Word</button>
-            <p id="feedback" style="color: #28a745; font-weight: bold;"></p>
+        <!-- Category Selection -->
+        <div id="categoryModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>Select Category</h1>
+                <button class="category-btn" onclick="startGame('travel')">✈️ Travel</button>
+                <button class="category-btn" onclick="startGame('politics')">🗳️ Philippine Politics</button>
+                <button class="category-btn" onclick="startGame('geography')">🗺️ Asian Geography</button>
+                <button class="category-btn" onclick="startGame('animals')">🦁 Animals</button>
+            </div>
+        </div>
+
+        <!-- Game Area -->
+        <div id="gameArea" class="modal gamearea">
+            <div class="game-layout">
+                <div class="game-left">
+                    <h1 id="gameTitle">Level 1</h1>
+                    <p id="playerInfo">Player: <span id="playerNameDisplay">Player</span></p>
+                    
+                    <div class="score-board">
+                        <div class="score-item">
+                            <div class="score-label">Correct</div>
+                            <div class="score-value" id="correctCount">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label">Progress</div>
+                            <div class="score-value" id="progressText">0/10</div>
+                        </div>
+                    </div>
+
+                    <div class="timer">Time: <span id="gameTimer">00:00</span></div>
+
+                    <div class="word-display" id="scrambledWord">EXAMPLE</div>
+                    <input type="text" id="answerInput" placeholder="Type your answer" autofocus>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button onclick="checkAnswer()">Submit</button>
+                        <button class="secondary" onclick="skipWord()">Skip</button>
+                    </div>
+                    <p id="feedback" class="feedback"></p>
+                </div>
+
+                <div class="game-right">
+                    <h3>👥 Players</h3>
+                    <div class="leaderboard" id="playersLeaderboard" style="font-size: 0.9em;">
+                        <p style="color: #666;">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Modal -->
+        <div id="resultsModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>Game Over! 🎉</h1>
+                <div class="score-board">
+                    <div class="score-item">
+                        <div class="score-label">Correct Answers</div>
+                        <div class="score-value" id="finalScore">0</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-label">Words Skipped</div>
+                        <div class="score-value" id="finalSkipped">0</div>
+                    </div>
+                </div>
+                <div id="finalLeaderboard"></div>
+                <div class="btn-row">
+                    <button onclick="resetGame()">Main Menu</button>
+                    <button class="secondary" onclick="playAgain()">Play Again</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Admin Modal -->
+        <div id="adminModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>⚙️ Admin Panel</h1>
+                
+                <div id="adminLoginForm">
+                    <p>Enter admin password:</p>
+                    <input type="password" id="adminPassword" placeholder="Password">
+                    <button onclick="adminLogin()">Login</button>
+                    <button class="secondary" onclick="closeAdminPanel()">Cancel</button>
+                </div>
+
+                <div id="adminContent" style="display: none;">
+                    <h2>Manage Players</h2>
+                    <p style="color: #999; font-size: 0.9em;">Select inactive players to remove them from the game session.</p>
+                    
+                    <div id="playersList" style="margin: 20px 0; max-height: 300px; overflow-y: auto;"></div>
+                    
+                    <div class="btn-row">
+                        <button onclick="removeSelectedPlayers()">🗑️ Remove Selected</button>
+                        <button class="secondary" onclick="closeAdminPanel()">Close</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-I817M6AXd_Kea2TE0lioIXNq95gjq2s",
+            authDomain: "word-unscramble-game-bba02.firebaseapp.com",
+            databaseURL: "https://word-unscramble-game-bba02-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "word-unscramble-game-bba02",
+            storageBucket: "word-unscramble-game-bba02.firebasestorage.app",
+            messagingSenderId: "940885860126",
+            appId: "1:940885860126:web:192e1fe2410a6eb07d730f",
+            measurementId: "G-500KYRN549"
+        };
+
+        let db = null;
+        let gameSessionId = null;
+        let firebaseReady = false;
+        let timerInterval = null;
+        let gameStartTime = null;
+
+        // Initialize Firebase
+        function initializeFirebase() {
+            if (typeof firebase === 'undefined') {
+                setTimeout(initializeFirebase, 500);
+                return;
+            }
+
+            try {
+                if (firebase.apps.length === 0) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.database();
+                firebaseReady = true;
+                console.log("Firebase initialized");
+            } catch (error) {
+                console.warn("Firebase error:", error.message);
+                firebaseReady = false;
+            }
+        }
+
         // Game data
         const gameData = {
             travel: {
@@ -108,7 +254,7 @@
             geography: {
                 easy: ['MANILA', 'JAPAN', 'SEOUL', 'BANGKOK', 'HANOI', 'CHINA', 'KOREA', 'LAOS', 'ASIA', 'BALI'],
                 moderate: ['ILOILO', 'DAVAO', 'BAGUIO', 'SINGAPORE', 'MALAYSIA', 'INDONESIA', 'THAILAND', 'MYANMAR', 'VIETNAM', 'CAMBODIA'],
-                difficult: ['GEOPOLITICAL', 'INSTITUTIONAL', 'TERRITORALSTATES']
+                difficult: ['GEOPOLITICAL', 'INSTITUTIONAL', 'TERRIORIAL']
             },
             animals: {
                 easy: ['DOG', 'ZEBRA', 'SNAKE', 'FISH', 'REINDEER', 'CAT', 'BIRD', 'LION', 'BEAR', 'DEER'],
@@ -127,7 +273,93 @@
             skipped: 0
         };
 
-        // Show functions
+        let selectedPlayers = new Set();
+
+        // Generate session ID
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Admin functions
+        function openAdminPanel() {
+            document.getElementById('adminModal').classList.remove('hidden');
+            document.getElementById('adminPassword').focus();
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminModal').classList.add('hidden');
+            document.getElementById('adminLoginForm').style.display = 'block';
+            document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
+            selectedPlayers.clear();
+        }
+
+        function adminLogin() {
+            const password = document.getElementById('adminPassword').value;
+            if (password === '12345') {
+                document.getElementById('adminLoginForm').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                loadPlayersList();
+            } else {
+                alert('Incorrect password');
+            }
+        }
+
+        function loadPlayersList() {
+            if (!gameSessionId || !firebaseReady || !db) {
+                document.getElementById('playersList').innerHTML = '<p style="color: #666;">No active game session</p>';
+                return;
+            }
+
+            db.ref('gameSessions/' + gameSessionId + '/players').on('value', function(snapshot) {
+                const players = snapshot.val() || {};
+                let html = '';
+                
+                Object.keys(players).forEach(playerId => {
+                    const player = players[playerId];
+                    const playerIdStr = playerId.toString();
+                    const isChecked = selectedPlayers.has(playerIdStr) ? 'checked' : '';
+                    html += `
+                        <div class="player-checkbox">
+                            <input type="checkbox" id="player_${playerIdStr}" value="${playerIdStr}" ${isChecked} onchange="togglePlayer('${playerIdStr}')">
+                            <label for="player_${playerIdStr}">${player.name} - Score: ${player.score || 0}</label>
+                        </div>
+                    `;
+                });
+
+                if (Object.keys(players).length === 0) {
+                    html = '<p style="color: #666;">No players in game session</p>';
+                }
+
+                document.getElementById('playersList').innerHTML = html;
+            });
+        }
+
+        function togglePlayer(playerId) {
+            if (selectedPlayers.has(playerId)) {
+                selectedPlayers.delete(playerId);
+            } else {
+                selectedPlayers.add(playerId);
+            }
+        }
+
+        function removeSelectedPlayers() {
+            if (selectedPlayers.size === 0) {
+                alert('Select players to remove');
+                return;
+            }
+
+            if (!confirm('Remove ' + selectedPlayers.size + ' player(s)?')) return;
+
+            selectedPlayers.forEach(playerId => {
+                db.ref('gameSessions/' + gameSessionId + '/players/' + playerId).remove();
+            });
+
+            selectedPlayers.clear();
+            loadPlayersList();
+        }
+
+        // Game UI functions
         function goToNameInput() {
             document.getElementById('welcomeModal').classList.add('hidden');
             document.getElementById('nameModal').classList.remove('hidden');
@@ -147,12 +379,40 @@
             gameState.currentWord = 0;
             gameState.score = 0;
             gameState.skipped = 0;
-            
+            gameStartTime = Date.now();
+
+            gameSessionId = generateSessionId();
+            initializeFirebase();
+
             document.getElementById('categoryModal').classList.add('hidden');
             document.getElementById('gameArea').classList.add('active');
             document.getElementById('playerNameDisplay').textContent = gameState.playerName;
-            
+
+            if (firebaseReady && db) {
+                db.ref('gameSessions/' + gameSessionId + '/players/' + gameState.playerName).set({
+                    name: gameState.playerName,
+                    score: 0,
+                    lastUpdated: Date.now()
+                });
+
+                updateLeaderboard();
+                db.ref('gameSessions/' + gameSessionId + '/players').on('value', updateLeaderboard);
+            }
+
+            startTimer();
             showNextWord();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                const minutes = Math.floor(elapsed / 60);
+                const seconds = elapsed % 60;
+                const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+                document.getElementById('gameTimer').textContent = timeStr;
+            }, 1000);
         }
 
         function showNextWord() {
@@ -160,11 +420,12 @@
                 endGame();
                 return;
             }
-            
+
             const word = gameState.words[gameState.currentWord];
             const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
-            
+
             document.getElementById('scrambledWord').textContent = scrambled;
+            document.getElementById('progressText').textContent = gameState.currentWord + '/' + gameState.words.length;
             document.getElementById('answerInput').value = '';
             document.getElementById('feedback').textContent = '';
             document.getElementById('answerInput').focus();
@@ -173,16 +434,24 @@
         function checkAnswer() {
             const answer = document.getElementById('answerInput').value.toUpperCase();
             const correctAnswer = gameState.words[gameState.currentWord];
-            
+
             if (answer === correctAnswer) {
                 gameState.score++;
+                document.getElementById('correctCount').textContent = gameState.score;
                 document.getElementById('feedback').textContent = '✓ Correct!';
                 document.getElementById('feedback').style.color = '#28a745';
+
+                if (firebaseReady && db) {
+                    db.ref('gameSessions/' + gameSessionId + '/players/' + gameState.playerName).update({
+                        score: gameState.score,
+                        lastUpdated: Date.now()
+                    });
+                }
             } else {
                 document.getElementById('feedback').textContent = '✗ Wrong! Answer: ' + correctAnswer;
                 document.getElementById('feedback').style.color = '#dc3545';
             }
-            
+
             setTimeout(() => {
                 gameState.currentWord++;
                 showNextWord();
@@ -196,17 +465,52 @@
         }
 
         function endGame() {
+            clearInterval(timerInterval);
             document.getElementById('gameArea').classList.remove('active');
+            document.getElementById('finalScore').textContent = gameState.score;
+            document.getElementById('finalSkipped').textContent = gameState.skipped;
+            
+            if (firebaseReady && db) {
+                db.ref('gameSessions/' + gameSessionId + '/players').off();
+            }
+
+            document.getElementById('resultsModal').classList.remove('hidden');
+        }
+
+        function updateLeaderboard() {
+            if (!gameSessionId || !firebaseReady || !db) return;
+
+            db.ref('gameSessions/' + gameSessionId + '/players').once('value', function(snapshot) {
+                const players = snapshot.val() || {};
+                const playerList = Object.values(players).sort((a, b) => (b.score || 0) - (a.score || 0));
+
+                let html = '<div class="leaderboard-title">🏆 Scores</div>';
+                playerList.forEach((player, index) => {
+                    html += `<div class="player-row"><span class="player-name">${index + 1}. ${player.name}</span><span class="player-score">${player.score || 0}</span></div>`;
+                });
+
+                document.getElementById('playersLeaderboard').innerHTML = html || '<p style="color: #666;">No players yet</p>';
+            });
+        }
+
+        function playAgain() {
+            document.getElementById('resultsModal').classList.add('hidden');
             document.getElementById('categoryModal').classList.remove('hidden');
-            alert(`Game Over!\n\nName: ${gameState.playerName}\nCorrect: ${gameState.score}\nSkipped: ${gameState.skipped}\nScore: ${gameState.score}/${gameState.words.length}`);
-            resetGame();
+            gameState = {
+                playerName: document.getElementById('playerName').value,
+                category: '',
+                level: 1,
+                words: [],
+                currentWord: 0,
+                score: 0,
+                skipped: 0
+            };
         }
 
         function resetGame() {
+            document.getElementById('resultsModal').classList.add('hidden');
             document.getElementById('welcomeModal').classList.remove('hidden');
-            document.getElementById('categoryModal').classList.add('hidden');
-            document.getElementById('nameModal').classList.add('hidden');
-            document.getElementById('gameArea').classList.remove('active');
+            clearInterval(timerInterval);
             gameState = {
                 playerName: '',
                 category: '',
@@ -218,12 +522,8 @@
             };
         }
 
-        // Make sure functions are globally accessible
-        window.goToNameInput = goToNameInput;
-        window.goToCategories = goToCategories;
-        window.startGame = startGame;
-        window.checkAnswer = checkAnswer;
-        window.skipWord = skipWord;
+        // Initialize
+        initializeFirebase();
     </script>
 </body>
 </html>
