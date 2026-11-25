@@ -51,6 +51,9 @@
         input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; }
         .category-btn { background: #f0f0f0; color: #333; padding: 15px; margin: 10px 0; text-align: left; }
         .category-btn:hover { background: #667eea; color: white; }
+        .level-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .level-btn { background: #f0f0f0; color: #333; padding: 18px 10px; }
+        .level-btn:hover { background: #667eea; color: white; }
         .word-display { font-size: 48px; font-weight: bold; letter-spacing: 10px; color: #333; margin: 30px 0; text-align: center; }
         .gamearea { display: none; }
         .gamearea.active { display: block; }
@@ -68,6 +71,13 @@
         .player-name { font-weight: 600; }
         .player-score { color: #667eea; font-weight: bold; }
         .feedback { font-weight: bold; margin: 15px 0; }
+        .review-list { max-height: 300px; overflow-y: auto; margin: 15px 0; }
+        .review-item { padding: 12px; margin: 8px 0; border-radius: 8px; background: #f8f9fa; }
+        .review-item.correct { border-left: 4px solid #28a745; }
+        .review-item.incorrect { border-left: 4px solid #dc3545; }
+        .review-item.skipped { border-left: 4px solid #f0ad4e; }
+        .review-word { font-weight: bold; color: #333; }
+        .review-status { margin-top: 4px; color: #666; font-size: 0.9em; }
         .admin-tab { margin-bottom: 15px; }
         .word-edit { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; }
         .word-edit input { margin: 5px 0; }
@@ -117,10 +127,24 @@
         <div id="categoryModal" class="modal hidden">
             <div class="modal-content">
                 <h1>Select Category</h1>
-                <button class="category-btn" onclick="startGame('travel')">✈️ Travel</button>
-                <button class="category-btn" onclick="startGame('politics')">🗳️ Philippine Politics</button>
-                <button class="category-btn" onclick="startGame('geography')">🗺️ Asian Geography</button>
-                <button class="category-btn" onclick="startGame('animals')">🦁 Animals</button>
+                <button class="category-btn" onclick="selectCategory('travel')">✈️ Travel</button>
+                <button class="category-btn" onclick="selectCategory('politics')">🗳️ Philippine Politics</button>
+                <button class="category-btn" onclick="selectCategory('geography')">🗺️ Asian Geography</button>
+                <button class="category-btn" onclick="selectCategory('animals')">🦁 Animals</button>
+            </div>
+        </div>
+
+        <!-- Level Selection -->
+        <div id="levelModal" class="modal hidden">
+            <div class="modal-content">
+                <h1>Select Difficulty</h1>
+                <p>Choose a level for this game:</p>
+                <div class="level-options">
+                    <button class="level-btn" onclick="startGame(gameState.category, 'easy')">Easy</button>
+                    <button class="level-btn" onclick="startGame(gameState.category, 'moderate')">Moderate</button>
+                    <button class="level-btn" onclick="startGame(gameState.category, 'difficult')">Difficult</button>
+                </div>
+                <button class="secondary" onclick="backToCategories()">Back to Categories</button>
             </div>
         </div>
 
@@ -177,6 +201,8 @@
                         <div class="score-value" id="finalTime">00:00</div>
                     </div>
                 </div>
+                <h2>Answer Review</h2>
+                <div id="reviewSummary" class="review-list"></div>
                 <div id="finalLeaderboard"></div>
                 <div class="btn-row">
                     <button onclick="resetGame()">Main Menu</button>
@@ -295,7 +321,9 @@
             words: [],
             currentWord: 0,
             score: 0,
-            skipped: 0
+            skipped: 0,
+            review: [],
+            answerPending: false
         };
 
         let selectedPlayers = new Set();
@@ -467,23 +495,43 @@
             document.getElementById('categoryModal').classList.remove('hidden');
         }
 
-        function startGame(category) {
+        function selectCategory(category) {
             gameState.category = category;
+            document.getElementById('categoryModal').classList.add('hidden');
+            document.getElementById('levelModal').classList.remove('hidden');
+        }
+
+        function backToCategories() {
+            document.getElementById('levelModal').classList.add('hidden');
+            document.getElementById('categoryModal').classList.remove('hidden');
+        }
+
+        function startGame(category, level) {
+            gameState.category = category;
+            gameState.level = level;
             gameState.playerName = document.getElementById('playerName').value || 'Player';
-            // Only take first 5 words for this round
-            gameState.words = gameData[category].easy.slice(0, 5);
+            gameState.words = gameData[category][level].slice(0, 5);
             gameState.currentWord = 0;
             gameState.score = 0;
             gameState.skipped = 0;
+            gameState.review = [];
+            gameState.answerPending = false;
             timerStarted = false;
+            gameStartTime = null;
+            clearInterval(timerInterval);
+            timerInterval = null;
 
             // gameSessionId is already set by goToCategories()
             initializeFirebase();
 
-            document.getElementById('categoryModal').classList.add('hidden');
+            document.getElementById('levelModal').classList.add('hidden');
             document.getElementById('gameArea').classList.add('active');
+            document.getElementById('gameTitle').textContent = level.charAt(0).toUpperCase() + level.slice(1) + ' Level';
             document.getElementById('playerNameDisplay').textContent = gameState.playerName;
             document.getElementById('sessionCodeDisplay').textContent = gameSessionId;
+            document.getElementById('correctCount').textContent = '0';
+            document.getElementById('progressText').textContent = '0/' + gameState.words.length;
+            document.getElementById('gameTimer').textContent = '00:00';
 
             if (firebaseReady && db) {
                 db.ref('gameSessions/' + gameSessionId + '/players/' + gameState.playerName).set({
@@ -518,6 +566,7 @@
                 endGame();
                 return;
             }
+            gameState.answerPending = false;
 
             const word = gameState.words[gameState.currentWord];
             const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
@@ -530,13 +579,16 @@
         }
 
         function checkAnswer() {
+            if (gameState.answerPending || gameState.currentWord >= gameState.words.length) return;
+            gameState.answerPending = true;
             startTimer();
             
-            const answer = document.getElementById('answerInput').value.toUpperCase();
+            const answer = document.getElementById('answerInput').value.trim().toUpperCase();
             const correctAnswer = gameState.words[gameState.currentWord];
 
             if (answer === correctAnswer) {
                 gameState.score++;
+                gameState.review.push({ answer: correctAnswer, submitted: answer, status: 'correct' });
                 document.getElementById('correctCount').textContent = gameState.score;
                 document.getElementById('feedback').textContent = '✓ Correct!';
                 document.getElementById('feedback').style.color = '#28a745';
@@ -548,6 +600,7 @@
                     });
                 }
             } else {
+                gameState.review.push({ answer: correctAnswer, submitted: answer, status: 'incorrect' });
                 document.getElementById('feedback').textContent = '✗ Wrong! Answer: ' + correctAnswer;
                 document.getElementById('feedback').style.color = '#dc3545';
             }
@@ -559,15 +612,46 @@
         }
 
         function skipWord() {
+            if (gameState.answerPending || gameState.currentWord >= gameState.words.length) return;
             startTimer();
             gameState.skipped++;
+            gameState.review.push({ answer: gameState.words[gameState.currentWord], submitted: '', status: 'skipped' });
             gameState.currentWord++;
             showNextWord();
         }
 
+        function renderReviewSummary() {
+            const summary = document.getElementById('reviewSummary');
+            summary.textContent = '';
+
+            gameState.review.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.className = 'review-item ' + result.status;
+
+                const word = document.createElement('div');
+                word.className = 'review-word';
+                word.textContent = (index + 1) + '. Answer: ' + result.answer;
+
+                const status = document.createElement('div');
+                status.className = 'review-status';
+                if (result.status === 'skipped') {
+                    status.textContent = 'Skipped';
+                } else if (result.status === 'incorrect') {
+                    status.textContent = 'Your answer: ' + (result.submitted || '(blank)') + ' — Incorrect';
+                } else {
+                    status.textContent = 'Your answer: ' + result.submitted + ' — Correct';
+                }
+
+                item.appendChild(word);
+                item.appendChild(status);
+                summary.appendChild(item);
+            });
+        }
+
         function endGame() {
             clearInterval(timerInterval);
-            const timeTaken = Math.floor((Date.now() - gameStartTime) / 1000);
+            timerInterval = null;
+            const timeTaken = gameStartTime ? Math.floor((Date.now() - gameStartTime) / 1000) : 0;
             const minutes = Math.floor(timeTaken / 60);
             const seconds = timeTaken % 60;
             const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
@@ -575,6 +659,8 @@
             document.getElementById('gameArea').classList.remove('active');
             document.getElementById('finalScore').textContent = gameState.score;
             document.getElementById('finalTime').textContent = timeStr;
+            document.getElementById('finalLeaderboard').textContent = '';
+            renderReviewSummary();
             
             if (firebaseReady && db) {
                 db.ref('gameSessions/' + gameSessionId + '/players').off();
@@ -655,7 +741,9 @@
                 words: [],
                 currentWord: 0,
                 score: 0,
-                skipped: 0
+                skipped: 0,
+                review: [],
+                answerPending: false
             };
         }
 
@@ -672,7 +760,9 @@
                 words: [],
                 currentWord: 0,
                 score: 0,
-                skipped: 0
+                skipped: 0,
+                review: [],
+                answerPending: false
             };
         }
 
