@@ -170,11 +170,16 @@
                     <div class="timer">Time: <span id="gameTimer">00:00</span></div>
 
                     <div class="word-display" id="scrambledWord">EXAMPLE</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button class="secondary" onclick="showHint()">Hint</button>
+                        <button class="secondary" onclick="scrambleCurrentWord()">Scramble</button>
+                    </div>
                     <input type="text" id="answerInput" placeholder="Type your answer" autofocus>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                         <button onclick="checkAnswer()">Submit</button>
                         <button class="secondary" onclick="skipWord()">Skip</button>
                     </div>
+                    <p id="hintDisplay" class="feedback" aria-live="polite"></p>
                     <p id="feedback" class="feedback"></p>
                 </div>
 
@@ -293,24 +298,143 @@
         // Game data
         const gameData = {
             travel: {
-                easy: ['DESK', 'TRIP', 'MAPS', 'CARD', 'PORT', 'TAXI', 'GATE', 'CAB', 'TRAIN', 'BUS'],
-                moderate: ['HOTEL', 'TICKET', 'AGENTS', 'KIOSK', 'QUEUE', 'CABIN', 'RUNWAY', 'PILOT', 'VOYAGE', 'CUSTOMS'],
-                difficult: ['ITINERARY', 'DEPARTURE', 'AIRCRAFT', 'PASSPORT', 'TRANSIT', 'DESTINATION', 'CONNECTION', 'TERMINAL', 'NAVIGATION']
+                easy: [
+                    { answer: 'DESK', hint: 'Laging inaagaw ng CLAIMS' },
+                    { answer: 'TRIP', hint: 'A journey to another place' },
+                    { answer: 'MAPS', hint: 'Helps you find your destination' },
+                    { answer: 'CARD', hint: 'You might use this to pay while traveling' },
+                    { answer: 'PORT', hint: 'A place where ships arrive and depart' },
+                    { answer: 'TAXI', hint: 'A car you can hire to take you somewhere' },
+                    { answer: 'GATE', hint: 'Where passengers wait to board' },
+                    { answer: 'CAB', hint: 'Another word for a taxi' },
+                    { answer: 'TRAIN', hint: 'A vehicle that runs on railway tracks' },
+                    { answer: 'BUS', hint: 'A road vehicle that carries many passengers' }
+                ],
+                moderate: [
+                    { answer: 'HOTEL', hint: 'Where travelers stay overnight' },
+                    { answer: 'TICKET', hint: "Proof that you're booked to travel" },
+                    { answer: 'AGENTS', hint: 'They can help arrange travel' },
+                    { answer: 'KIOSK', hint: 'Self-service machine found at airports' },
+                    { answer: 'QUEUE', hint: 'A line of passengers waiting' },
+                    { answer: 'CABIN', hint: 'The passenger area inside an aircraft' },
+                    { answer: 'RUNWAY', hint: 'The strip where aircraft take off and land' },
+                    { answer: 'PILOT', hint: 'The person who flies an aircraft' },
+                    { answer: 'VOYAGE', hint: 'A long journey, often by sea' },
+                    { answer: 'CUSTOMS', hint: 'Where travelers declare goods at a border' }
+                ],
+                difficult: [
+                    { answer: 'ITINERARY', hint: 'Your detailed travel schedule' },
+                    { answer: 'DEPARTURE', hint: 'When your flight leaves' },
+                    { answer: 'AIRCRAFT', hint: 'The vehicle used to fly passengers' },
+                    { answer: 'AMADEUS', hint: 'Where you work' },
+                    { answer: 'PASSPORT', hint: 'Required for most international travel' },
+                    { answer: 'TRANSIT', hint: 'Travel through or across a place' },
+                    { answer: 'DESTINATION', hint: 'The place you are traveling to' },
+                    { answer: 'CONNECTION', hint: 'A transfer between two travel services' },
+                    { answer: 'TERMINAL', hint: 'A passenger building at an airport' },
+                    { answer: 'NAVIGATION', hint: 'Finding and following a route' }
+                ]
             },
             politics: {
-                easy: ['VOTE', 'ALLOW', 'WILL', 'LAWS', 'SENATE', 'RESIDENT', 'LEADER', 'PARTY', 'BILL', 'MAYOR'],
-                moderate: ['CONGRESS', 'ELECTION', 'CAMPAIGN', 'BALLOT', 'DIPLOMAT', 'MINISTER', 'CABINET', 'LEGISLATOR', 'GOVERNOR', 'COUNCIL'],
-                difficult: ['CONSTITUTIONAL', 'CORRUPTION', 'PROSECUTION', 'SOVEREIGNTY', 'AMENDMENT']
+                easy: [
+                    { answer: 'VOTE', hint: 'Cast your ballot in an election' },
+                    { answer: 'ALLOW', hint: 'Permission to do something' },
+                    { answer: 'WILL', hint: 'Determination and purpose' },
+                    { answer: 'LAWS', hint: 'Rules set by the government' },
+                    { answer: 'SENATE', hint: 'Upper chamber of Congress' },
+                    { answer: 'RESIDENT', hint: 'Person living in a place' },
+                    { answer: 'MESS', hint: 'Disorderly situation' },
+                    { answer: 'CLIMATE', hint: 'Weather patterns of a region' },
+                    { answer: 'RING', hint: 'Circular band' },
+                    { answer: 'PLURAL', hint: 'More than one' }
+                ],
+                moderate: [
+                    { answer: 'PRESIDENTIAL', hint: 'Relating to the president' },
+                    { answer: 'CONSTITUTIONAL', hint: 'Based on the constitution' },
+                    { answer: 'MONARCHY', hint: 'Government ruled by a king or queen' },
+                    { answer: 'PRECEDENT', hint: 'An earlier decision used as an example' },
+                    { answer: 'PARLIAMENT', hint: 'Body of government officials' },
+                    { answer: 'MINISTRY', hint: 'Government department' },
+                    { answer: 'REPRESENT', hint: 'To act on behalf of others' },
+                    { answer: 'CROCODILE', hint: 'A large aquatic reptile with powerful jaws' }
+                ],
+                difficult: [
+                    { answer: 'POLITICAL', hint: 'Relating to politics' },
+                    { answer: 'CONSTITUTIONALS', hint: 'Supporters of constitutional monarchy' },
+                    { answer: 'PATRIARCHY', hint: 'Rule by the father figure' },
+                    { answer: 'PORK BARREL', hint: 'Government spending directed toward local projects' },
+                    { answer: 'CORRUPTION', hint: 'Dishonest or illegal use of power for personal gain' },
+                    { answer: 'MOVEMENT', hint: 'Group action towards a goal' },
+                    { answer: 'DEMOCRACY', hint: 'Government by the people' },
+                    { answer: 'CONSTITUTIONAL', hint: 'Relating to the constitution' },
+                    { answer: 'ADMINISTRATION', hint: 'Management of government' },
+                    { answer: 'PROSECUTION', hint: 'Legal pursuit of a case' }
+                ]
             },
             geography: {
-                easy: ['MANILA', 'JAPAN', 'SEOUL', 'BANGKOK', 'HANOI', 'CHINA', 'KOREA', 'LAOS', 'ASIA', 'BALI'],
-                moderate: ['ILOILO', 'DAVAO', 'BAGUIO', 'SINGAPORE', 'MALAYSIA', 'INDONESIA', 'THAILAND', 'MYANMAR', 'VIETNAM', 'CAMBODIA'],
-                difficult: ['GEOPOLITICAL', 'INSTITUTIONAL', 'TERRIORIAL']
+                easy: [
+                    { answer: 'MANILA', hint: 'Capital of the Philippines' },
+                    { answer: 'ASIAN', hint: 'Relating to Asia' },
+                    { answer: 'JAPAN', hint: 'Country with Mount Fuji' },
+                    { answer: 'HAITI', hint: 'Caribbean island nation' },
+                    { answer: 'INDIA', hint: 'Large Asian country' },
+                    { answer: 'CHINA', hint: 'Most populous country in Asia' },
+                    { answer: 'SEOUL', hint: 'Capital of South Korea' },
+                    { answer: 'BANGKOK', hint: 'Capital of Thailand' },
+                    { answer: 'HANOI', hint: 'Capital of Vietnam' }
+                ],
+                moderate: [
+                    { answer: 'ILOILO', hint: 'City in Western Visayas' },
+                    { answer: 'DAVAO', hint: 'City in Mindanao' },
+                    { answer: 'BAGUIO', hint: 'A Philippine city known for its cool climate and mountain scenery' },
+                    { answer: 'SINGAPORE', hint: 'A city-state in Southeast Asia known for Marina Bay and its modern skyline' },
+                    { answer: 'MALAYSIA', hint: 'A Southeast Asian country known for the Petronas Twin Towers' },
+                    { answer: 'INDONESIA', hint: 'A Southeast Asian country made up of thousands of islands' },
+                    { answer: 'MYANMAR', hint: 'A Southeast Asian country formerly known as Burma' }
+                ],
+                difficult: [
+                    { answer: 'PHILIPPINE', hint: 'Relating to the Philippines' },
+                    { answer: 'GEOGRAPHICAL', hint: 'Related to geography' },
+                    { answer: 'ARCHIPELAGO', hint: 'Group of islands' },
+                    { answer: 'GEOPOLITICAL', hint: 'Political relations between regions' },
+                    { answer: 'GEOGRAPHICAL', hint: 'Study of regions and places' },
+                    { answer: 'INTERNATIONAL', hint: 'Between nations' },
+                    { answer: 'REGIONAL', hint: 'Relating to a specific area' },
+                    { answer: 'INSTITUTIONAL', hint: 'Related to institutions' }
+                ]
             },
             animals: {
-                easy: ['DOG', 'ZEBRA', 'SNAKE', 'FISH', 'REINDEER', 'CAT', 'BIRD', 'LION', 'BEAR', 'DEER'],
-                moderate: ['ELEPHANT', 'GIRAFFE', 'CROCODILE', 'RABBIT', 'HIPPOPOTAMUS', 'CHEETAH', 'TIGER', 'MONKEY', 'PENGUIN', 'DOLPHIN'],
-                difficult: ['NOCTURNAL', 'PREDATOR', 'TARANTULA', 'SCORPION', 'MAMMALS']
+                easy: [
+                    { answer: 'CAT', hint: 'A small furry pet that meows' },
+                    { answer: 'DOG', hint: "Man's best friend" },
+                    { answer: 'ZEBRA', hint: 'African animal with black and white stripes' },
+                    { answer: 'BEAR', hint: 'Large furry animal that hibernates' },
+                    { answer: 'OWL', hint: 'Nocturnal bird that hoots' },
+                    { answer: 'SNAKE', hint: 'Reptile with no legs' },
+                    { answer: 'LION', hint: 'The king of the jungle' },
+                    { answer: 'TIGER', hint: 'Orange striped big cat' },
+                    { answer: 'FISH', hint: 'Aquatic animal with gills' },
+                    { answer: 'REINDEER', hint: "Animal that pulls Santa's sleigh" }
+                ],
+                moderate: [
+                    { answer: 'ELEPHANT', hint: 'Large animal with a long trunk' },
+                    { answer: 'GIRAFFE', hint: 'Tallest animal with a long neck' },
+                    { answer: 'CROCODILE', hint: 'Reptile with many teeth' },
+                    { answer: 'RABBIT', hint: 'Small furry animal with long ears' },
+                    { answer: 'HIPPOPOTAMUS', hint: 'A large African mammal that spends much of its time in water' },
+                    { answer: 'MONKEY', hint: 'Primate that swings in trees' },
+                    { answer: 'PARROT', hint: 'Colorful bird that can talk' },
+                    { answer: 'OSTRICH', hint: 'Largest flightless bird' }
+                ],
+                difficult: [
+                    { answer: 'CHIMPANZEES', hint: 'Our closest relatives in the animal kingdom' },
+                    { answer: 'CARNIVOROUS', hint: 'Animals that eat meat' },
+                    { answer: 'NOCTURNAL', hint: 'Animals that are active at night' },
+                    { answer: 'PREDATOR', hint: 'Animal that hunts others' },
+                    { answer: 'TARANTULA', hint: 'Large hairy spider' },
+                    { answer: 'SCORPION', hint: 'Arachnid with a poisonous tail' },
+                    { answer: 'MAMMALS', hint: 'Warm-blooded animals with fur' }
+                ]
             }
         };
 
@@ -510,7 +634,10 @@
             gameState.category = category;
             gameState.level = level;
             gameState.playerName = document.getElementById('playerName').value || 'Player';
-            gameState.words = gameData[category][level].slice(0, 5);
+            gameState.words = gameData[category][level]
+                .slice()
+                .sort(() => Math.random() - 0.5)
+                .slice(0, 5);
             gameState.currentWord = 0;
             gameState.score = 0;
             gameState.skipped = 0;
@@ -569,13 +696,40 @@
             gameState.answerPending = false;
 
             const word = gameState.words[gameState.currentWord];
-            const scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+            const scrambled = makeScramble(word.answer);
 
             document.getElementById('scrambledWord').textContent = scrambled;
             document.getElementById('progressText').textContent = gameState.currentWord + '/' + gameState.words.length;
             document.getElementById('answerInput').value = '';
+            document.getElementById('hintDisplay').textContent = '';
             document.getElementById('feedback').textContent = '';
             document.getElementById('answerInput').focus();
+        }
+
+        function makeScramble(word) {
+            return word.split(' ').map(part => {
+                const letters = part.split('');
+                for (let i = letters.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [letters[i], letters[j]] = [letters[j], letters[i]];
+                }
+                if (letters.join('') === part && letters.length > 1) {
+                    letters.push(letters.shift());
+                }
+                return letters.join('');
+            }).join(' ');
+        }
+
+        function showHint() {
+            if (gameState.answerPending || gameState.currentWord >= gameState.words.length) return;
+            document.getElementById('hintDisplay').textContent =
+                'Hint: ' + gameState.words[gameState.currentWord].hint;
+        }
+
+        function scrambleCurrentWord() {
+            if (gameState.answerPending || gameState.currentWord >= gameState.words.length) return;
+            document.getElementById('scrambledWord').textContent =
+                makeScramble(gameState.words[gameState.currentWord].answer);
         }
 
         function checkAnswer() {
@@ -584,7 +738,7 @@
             startTimer();
             
             const answer = document.getElementById('answerInput').value.trim().toUpperCase();
-            const correctAnswer = gameState.words[gameState.currentWord];
+            const correctAnswer = gameState.words[gameState.currentWord].answer;
 
             if (answer === correctAnswer) {
                 gameState.score++;
@@ -615,7 +769,7 @@
             if (gameState.answerPending || gameState.currentWord >= gameState.words.length) return;
             startTimer();
             gameState.skipped++;
-            gameState.review.push({ answer: gameState.words[gameState.currentWord], submitted: '', status: 'skipped' });
+            gameState.review.push({ answer: gameState.words[gameState.currentWord].answer, submitted: '', status: 'skipped' });
             gameState.currentWord++;
             showNextWord();
         }
